@@ -37,8 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #thirdparty
     'bootstrap5',
+    
+    #local
     'user_home',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -133,3 +137,8 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#Setting CustomUserModel as authorised model
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
