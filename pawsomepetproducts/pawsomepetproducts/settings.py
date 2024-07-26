@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     #local
     'user_home',
     'accounts',
+    'customadmin',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

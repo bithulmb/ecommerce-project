@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate,login,logout
 # Create your views here.
 
 def home_view(request):
-    return render(request,'home.html')
+    return render(request,'user_home/home.html')
 
 
 def login_view(request):
@@ -26,7 +26,7 @@ def login_view(request):
         else:
             messages.error(request,"Invalid Credentials. Try Again")
             return redirect('login_page')
-    return render(request,'login.html')
+    return render(request,'user_home/login.html')
 
 
 def signup_view(request):
@@ -34,7 +34,7 @@ def signup_view(request):
     #if request is get render the registration form
     if request.method == 'GET':
         form = RegisterForm()
-        return render(request,'signup.html', {'form':form})
+        return render(request,'user_home/signup.html', {'form':form})
     
     #if requet is POST check for form validation and save the details
     if request.method == 'POST':
@@ -44,16 +44,16 @@ def signup_view(request):
             messages.succes(request, "User created Succesfully. Please login")
             return redirect('login_page')
         else:
-            return render(request,'signup.html',{'form': form})
+            return render(request,'user_home/signup.html',{'form': form})
 
 def all_products_view(request):
-    return render(request, 'all_products.html')
+    return render(request, 'user_home/all_products.html')
 
 def about_us_view(request):
-    return render(request, 'about_us.html')
+    return render(request, 'user_home/about_us.html')
 
 
 def contact_us_view(request):
-    return render(request, 'contact_us.html')
+    return render(request, 'user_home/contact_us.html')
         
         
