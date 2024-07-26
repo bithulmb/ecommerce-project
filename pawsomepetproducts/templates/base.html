@@ -51,7 +51,7 @@ $(document).ready(function() {
 <body>
     <!-- ========================= HEADER ========================= -->
 <div class="container">
-    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-2">
       <div class="col-md-3 mb-2 mb-md-0">
         <a href="./" class="brand-wrap">
 			<img class="logo" src="{% static './images/logo.png' %}">
@@ -59,10 +59,10 @@ $(document).ready(function() {
       </div>
 
       <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-        <li><a href="#" class="nav-link px-2">Home</a></li>
-        <li><a href="#" class="nav-link px-2">All Products</a></li>
-        <li><a href="#" class="nav-link px-2">About US</a></li>
-        <li><a href="#" class="nav-link px-2">Contact Us</a></li>
+        <li><a href="{% url 'home_page' %}" class="nav-link px-2">Home</a></li>
+        <li><a href="{% url 'all_products_page' %}" class="nav-link px-2">All Products</a></li>
+        <li><a href="{% url 'about_us_page' %}" class="nav-link px-2">About US</a></li>
+        <li><a href="{% url 'contact_us_page' %}" class="nav-link px-2">Contact Us</a></li>
       </ul>
 	  <div class="col-lg  col-md-6 col-sm-12 col">
 		<div><form action="#" class="search">
