@@ -11,7 +11,22 @@ class CustomUserAdmin(UserAdmin):
 
     filter_horizontal=()
     list_filter=()
-    fieldsets=()
+    # fieldsets=()
+    
+    #added to remove the error while adding custom ussr from the admin panel
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'phone_number')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_admin', 'is_superadmin')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    )
+    
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'first_name', 'last_name', 'phone_number', 'password1', 'password2', 'is_active', 'is_staff', 'is_admin', 'is_superadmin'),
+        }),
+    )
 
 admin.site.register(CustomUser, CustomUserAdmin)
 

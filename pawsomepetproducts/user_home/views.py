@@ -41,7 +41,7 @@ def signup_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.succes(request, "User created Succesfully. Please login")
+            messages.success(request, "User created Succesfully. Please login")
             return redirect('login_page')
         else:
             return render(request,'user_home/signup.html',{'form': form})
