@@ -2,11 +2,10 @@
 
 {% block content %}
 
-
 <section class="content-main">
     <div class="content-header">
         <div>
-            <h2 class="content-title card-title">User List </h2>
+            <h2 class="content-title card-title">Category List </h2>
         </div>
         <!-- <div>
             <input type="text" placeholder="Search order ID" class="form-control bg-white">
@@ -40,28 +39,22 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
+                            <th>Sl No</th>
                             <th>ID</th>
                             <th scope="col">Name</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Mobile Number</th>
-                            <th scope="col">Date Joined</th>
-                            <th scope="col">Last Login</th>
                             <th scope="col">Is Active</th>
-                            <th scope="col" class="text-end"> Action </th>
+                            <th scope="col" class=""> Action </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for user in users %}
+                        {% for category in categories %}
                         <tr>
-                            <td>{{user.id}}</td>
-                            <td><b>{{user.first_name}} {{user.last_name}}</b></td>
-                            <td>{{user.email}}</td>
-                            <td>{{user.phone_number}}</td>
-                            <td>{{user.date_joined}}</td>
-                            <td>{{user.last_login}}</td>
-                            <td>{{user.is_active}}</td>
-                            <td class="text-end">
-                                <a href="#" class="btn btn-md rounded font-sm">Detail</a>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{category.id}}</td>
+                            <td><b>{{category.name}}</b></td>
+                            <td>{{category.is_active}}</td>
+                            <td class="">
+                                <a href="{% url 'admin_edit_category' category.id %}" class="btn btn-md rounded font-sm">Edit</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -83,5 +76,7 @@
         </nav>
     </div> -->
 </section> <!-- content-main end// -->
+
+
 
 {% endblock %}

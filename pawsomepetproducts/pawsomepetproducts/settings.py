@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     #thirdparty
     'bootstrap5',
     'crispy_forms',
@@ -46,6 +47,8 @@ INSTALLED_APPS = [
     'user_home',
     'accounts',
     'customadmin',
+    'category',
+    'pet_type',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

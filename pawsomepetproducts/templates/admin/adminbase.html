@@ -38,11 +38,12 @@
                 </li>
 
                 <li class="menu-item has-submenu">
-                    <a class="menu-link" href="#"> <i class="icon material-icons md-person"></i>
+                    <a class="menu-link" href="#">
+                        <i class="icon material-icons md-person"></i>
                         <span class="text">Users</span>
                     </a>
                     <div class="submenu">
-                        <a href="#">User List</a>
+                        <a href="{% url 'admin_users' %} ">User List</a>
                     </div>
                 </li>
 
@@ -74,8 +75,8 @@
                         <span class="text">Category</span>
                     </a>
                     <div class="submenu">
-                        <a href="#">Category List</a>
-                        <a href="#">Add Category</a>
+                        <a href="{% url 'admin_category' %}">Category List</a>
+                        <a href="{% url 'admin_add_category' %}">Add Category</a>
                     </div>
                 </li>
                 <li class="menu-item has-submenu">
@@ -83,8 +84,8 @@
                         <span class="text">Pet Type</span>
                     </a>
                     <div class="submenu">
-                        <a href="#">Pet Type List</a>
-                        <a href="#">Add Pet Type</a>
+                        <a href="{% url 'admin_pet_type' %}">Pet Type List</a>
+                        <a href="{% url 'admin_add_pet_type' %}">Add Pet Type</a>
                
                     </div>
                 </li>
@@ -135,7 +136,7 @@
         
         
         <footer class="main-footer font-xs">
-            <div class="row pb-30 pt-15">
+            <div class="row pb-30 pt-15 mb-0">
                 <div class="col-sm-6">
                     <script>
                     document.write(new Date().getFullYear())
