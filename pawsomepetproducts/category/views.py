@@ -7,7 +7,7 @@ from .forms import AddCategoryForm
 # Create your views here.
 
 
-#view for displaying category manangement page
+#view function for listing categories and searching in category manangement page
 def admin_category_view(request):
     query=request.GET.get('q')
     if query:
@@ -16,7 +16,7 @@ def admin_category_view(request):
         categories=Category.objects.all()
     return render(request, 'admin/admin_category.html', {'categories': categories})
 
-
+#view function for adding new category
 def admin_add_category_view(request):
     if request.method == 'POST':        
         form=AddCategoryForm(request.POST)
@@ -28,7 +28,7 @@ def admin_add_category_view(request):
     return render(request, 'admin/admin_add_category.html', {'form':form})
 
 
-
+#view function for editing category
 def admin_edit_category_view(request,pk):
     object=Category.objects.get(id=pk)
     if request.method == 'POST':
