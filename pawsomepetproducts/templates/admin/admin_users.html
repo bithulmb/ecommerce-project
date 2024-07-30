@@ -16,11 +16,13 @@
         <header class="card-header">
             <div class="row gx-3">
                 <div class="col-lg-4 col-md-6 me-auto">
-                    <input type="text" placeholder="Search..." class="form-control">
+                    <form action="{% url 'admin_users' %}" method="GET">
+                    <input type="text" placeholder="Search Users" name="q" value="{{request.GET.q}}" class="form-control">
+                    </form>
                 </div>
                 <div class="col-lg-2 col-6 col-md-3">
                     <select class="form-select">
-                        <option>Status</option>
+                        <option>Sort By</option>
                         <option>Active</option>
                         <option>Disabled</option>
                         <option>Show all</option>

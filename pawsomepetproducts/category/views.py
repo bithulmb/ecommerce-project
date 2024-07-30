@@ -9,7 +9,11 @@ from .forms import AddCategoryForm
 
 #view for displaying category manangement page
 def admin_category_view(request):
-    categories=Category.objects.all()
+    query=request.GET.get('q')
+    if query:
+        categories=Category.objects.filter(name__icontains=query)
+    else:
+        categories=Category.objects.all()
     return render(request, 'admin/admin_category.html', {'categories': categories})
 
 

@@ -7,15 +7,18 @@
         <div>
             <h2 class="content-title card-title">Pet Type List </h2>
         </div>
-        <!-- <div>
+        <!-- <div class="input-grou">
             <input type="text" placeholder="Search order ID" class="form-control bg-white">
+            <button type="submit" class="btn btn-primary">Search</button>
         </div> -->
     </div>
     <div class="card mb-4">
         <header class="card-header">
             <div class="row gx-3">
                 <div class="col-lg-4 col-md-6 me-auto">
-                    <input type="text" placeholder="Search..." class="form-control">
+                    <form action="{% url 'admin_pet_type' %}" method="GET">
+                    <input type="text" placeholder="Search Pet Types" name="q" value="{{request.GET.q}}" class="form-control">
+                    </form>
                 </div>
                 <div class="col-lg-2 col-6 col-md-3">
                     <select class="form-select">

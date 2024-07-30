@@ -6,7 +6,11 @@ from .forms import AddPetTypeForm
 
 
 def admin_pet_type_view(request):
-    pet_types=PetType.objects.all()
+    query=request.GET.get('q')
+    if query:
+        pet_types=PetType.objects.filter(name__icontains=query)
+    else:
+        pet_types=PetType.objects.all()
     return render(request, 'admin/admin_pet_type.html', {'pet_types': pet_types})
 
 
