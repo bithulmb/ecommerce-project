@@ -10,4 +10,4 @@ class RegisterForm(UserCreationForm):
                                 widget=forms.PasswordInput)
     class Meta:
         model = CustomUser
-        fields = [ 'first_name', 'last_name','email', 'phone_number', 'password1', 'password2']
+        fields = [ 'first_name', 'last_name','email','password1', 'password2']

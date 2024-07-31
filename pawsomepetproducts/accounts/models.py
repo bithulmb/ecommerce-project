@@ -42,7 +42,7 @@ class CustomUser(AbstractBaseUser):
     last_name       =models.CharField(max_length=50)
     # username        =models.CharField(max_length=50, unique=True)
     email           =models.CharField(max_length=100,unique=True)
-    phone_number    =models.CharField(max_length=50)
+    # phone_number    =models.CharField(max_length=50)
 
     #required
     date_joined     =models.DateTimeField(auto_now_add=True)
@@ -50,7 +50,7 @@ class CustomUser(AbstractBaseUser):
     is_admin        =models.BooleanField(default=False)
     is_staff        =models.BooleanField(default=False)
     is_superadmin   =models.BooleanField(default=False)
-    is_active       =models.BooleanField(default=False)
+    is_active       =models.BooleanField(default=True)
 
     USERNAME_FIELD  ='email'
     REQUIRED_FIELDS =['first_name','last_name']

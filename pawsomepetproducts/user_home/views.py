@@ -17,9 +17,9 @@ def login_view(request):
         
     #Getting the details for signing in
     if request.method=="POST":
-        email=request.POST.get("email")
-        password=request.POST.get("password")
-        user=authenticate(request, email=email, password=password)
+        email       = request.POST.get("email")
+        password    = request.POST.get("password")
+        user        = authenticate(request, email=email, password=password)
         if user is not None:
             login(request,user)
             return redirect('home_page')
@@ -55,5 +55,10 @@ def about_us_view(request):
 
 def contact_us_view(request):
     return render(request, 'user_home/contact_us.html')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('home_page')
         
         

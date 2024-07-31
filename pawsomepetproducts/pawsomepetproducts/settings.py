@@ -38,10 +38,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+
     #thirdparty
     'bootstrap5',
     'crispy_forms',
     'crispy_bootstrap5',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     
     #local
     'user_home',
@@ -51,6 +56,8 @@ INSTALLED_APPS = [
     'pet_type',
 ]
 
+
+#for adding django crispy forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
@@ -62,6 +69,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware', # for social authentication
 ]
 
 ROOT_URLCONF = 'pawsomepetproducts.urls'
@@ -77,10 +85,24 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
             ],
         },
     },
 ]
+
+
+#added to  integrate django social authentication
+AUTHENTICATION_BACKENDS = [
+
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+    
+]
+
 
 WSGI_APPLICATION = 'pawsomepetproducts.wsgi.application'
 
@@ -149,5 +171,38 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 #Setting CustomUserModel as authorised model
-
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Provider specific settings for social authentication
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+                'profile',
+                'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type' : 'online',
+        }
+        
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+    #     'APP': {
+    #         'client_id': '123',
+    #         'secret': '456',
+    #         'key': ''
+    #     }
+    }
+}
+
+
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'email'
+
+
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

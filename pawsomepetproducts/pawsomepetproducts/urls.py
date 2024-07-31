@@ -20,4 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('user_home.urls')),  #redirecting to user_home app urls 
     path('admin-panel/', include('customadmin.urls')),  #redirecting to customadmin app urls
+    path('accounts/', include('allauth.urls')), #for including social authentication urls
 ]
