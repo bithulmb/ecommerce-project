@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'customadmin',
     'category',
     'pet_type',
+    'product',
 ]
 
 
@@ -162,6 +163,17 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     ]
+
+
+
+#Media files configuration
+
+# Base url to serve media files
+MEDIA_URL = '/media/'
+# Path where media is stored'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
 
 
 # Default primary key field type
