@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate,login,logout
 
 
 #Admin Side views
+#-------------------------Admin side views----------------------------------
 
 #view function for listing the users in admin panel
 def admin_users_view(request):
@@ -25,7 +26,7 @@ def admin_users_view(request):
 
 # User side views
 
-
+#-------------------------User side views----------------------------------
 
 def login_view(request):
 

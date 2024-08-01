@@ -1,0 +1,144 @@
+{% extends 'admin/adminbase.html' %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Products List </h2>
+        </div>
+        <!-- <div class="input-grou">
+            <input type="text" placeholder="Search order ID" class="form-control bg-white">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div> -->
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <form action="{% url 'admin_products' %}" method="GET">
+                    <input type="text" placeholder="Search Pet Types" name="q" value="{{request.GET.q}}" class="form-control">
+                    </form>
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Status</option>
+                        <option>Active</option>
+                        <option>Disabled</option>
+                        <option>Show all</option>
+                    </select>
+                </div>
+                <!-- <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Show 20</option>
+                        <option>Show 30</option>
+                        <option>Show 40</option>
+                    </select>
+                </div> -->
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Sl No</th>
+                            <th>ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Pet Type</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Is Active</th>
+                            <th scope="col" class=""> Action </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{product.id}}</td>
+                            <td><b>{{product.name}}</b></td>
+                            <td><b>{{product.pet_type.name}}</b></td>
+                            <td><b>{{product.category.name}}</b></td>
+                            <td>{{product.is_active}}</td>
+                            <td class="">
+                                <a href="{% url 'admin_edit_product' product.id %}" class="btn btn-md rounded font-sm">Edit</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div> <!-- table-responsive //end -->
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+    <!-- <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                <li class="page-item"><a class="page-link" href="#">02</a></li>
+                <li class="page-item"><a class="page-link" href="#">03</a></li>
+                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                <li class="page-item"><a class="page-link" href="#">16</a></li>
+                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+            </ul>
+        </nav>
+    </div> -->
+</section> 
+<!-- content-main end// -->
+
+
+
+<!-- 
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Pet Type List </h2>
+            <p>View, Edit or Add Pet Type</p>
+        </div>
+        <div>
+            <input type="text" placeholder="Search Categories" class="form-control bg-white">
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button class="btn btn-primary" type="submit">Add</button>
+                      </form>
+                      
+                </div>
+                <div class="col-md-7 offset-md-1">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Is Active</th>
+                                    <th scope="col" class=""> Action </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pet in pet_types %}
+                                <tr>
+                                    <td>{{pet.id}}</td>
+                                    <td><b>{{pet.name}}</b></td>
+                                    <td>{{pet.is_active}}</td>
+                                    <td class="">
+                                        <a href="#" class="btn btn-md rounded font-sm">Detail</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div> 
+            </div>
+         </div>
+        </div> 
+</section>  -->
+
+
+{% endblock %}
