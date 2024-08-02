@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from .models import CustomUser
 from django.db.models import Q
-from .forms import RegisterForm
+from .forms import RegisterForm,CustomUserUpdateForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 
@@ -13,14 +13,30 @@ from django.contrib.auth import authenticate,login,logout
 
 #view function for listing the users in admin panel
 def admin_users_view(request):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
     query=request.GET.get('q')
     if query:   #if there is search query
-        users=CustomUser.objects.filter(Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query))
+        users=CustomUser.objects.filter(is_superadmin = False).filter(Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query))
     else:
-        users=CustomUser.objects.all()
+        users=CustomUser.objects.filter(is_superadmin = False)
     return render(request, 'admin/admin_users.html', {'users':users})
 
 
+def admin_edit_user_view(request, pk):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
+    object=CustomUser.objects.get(id=pk)
+    if request.method == 'POST':
+        form=CustomUserUpdateForm(request.POST, instance = object)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_users')
+    else:
+        form=CustomUserUpdateForm(instance = object)
+    return render(request, 'admin/admin_edit_user.html', {'form':form})
 
 
 
@@ -49,7 +65,10 @@ def login_view(request):
 
 
 def signup_view(request):
-
+    #if already loggedin redirect to home
+    if request.user.is_authenticated:
+        return redirect('home_page')
+    
     #if request is get render the registration form
     if request.method == 'GET':
         form = RegisterForm()

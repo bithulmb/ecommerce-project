@@ -23,6 +23,6 @@ urlpatterns = [
     path('',include('user_home.urls')),  #redirecting to user_home app urls 
     path('',include('product.urls')), #redirecting to product app urls
     path('',include('accounts.urls')), #redirecting to accounts app urls
-    path('admin-panel/', include('customadmin.urls')),  #redirecting to customadmin app urls
+    path('', include('customadmin.urls')),  #redirecting to customadmin app urls
     path('accounts/', include('allauth.urls')), #for including social authentication urls
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) #for including media files 

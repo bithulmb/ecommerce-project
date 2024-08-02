@@ -20,14 +20,14 @@
                     <input type="text" placeholder="Search Users" name="q" value="{{request.GET.q}}" class="form-control">
                     </form>
                 </div>
-                <div class="col-lg-2 col-6 col-md-3">
+                <!-- <div class="col-lg-2 col-6 col-md-3">
                     <select class="form-select">
                         <option>Sort By</option>
                         <option>Active</option>
                         <option>Disabled</option>
                         <option>Show all</option>
                     </select>
-                </div>
+                </div> -->
                 <!-- <div class="col-lg-2 col-6 col-md-3">
                     <select class="form-select">
                         <option>Show 20</option>
@@ -42,7 +42,8 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th scope="col">Sl No</th>
+                            <th scope="col">ID</th>
                             <th scope="col">Name</th>
                             <th scope="col">Email</th>
                             <!-- <th scope="col">Mobile Number</th> -->
@@ -55,6 +56,7 @@
                     <tbody>
                         {% for user in users %}
                         <tr>
+                            <td>{{forloop.counter}}</td>
                             <td>{{user.id}}</td>
                             <td><b>{{user.first_name}} {{user.last_name}}</b></td>
                             <td>{{user.email}}</td>
@@ -63,7 +65,7 @@
                             <td>{{user.last_login}}</td>
                             <td>{{user.is_active}}</td>
                             <td class="text-end">
-                                <a href="#" class="btn btn-md rounded font-sm">Detail</a>
+                                <a href="{% url 'admin_edit_user' user.id %}" class="btn btn-md rounded font-sm">Edit Status</a>
                             </td>
                         </tr>
                         {% endfor %}

@@ -2,11 +2,17 @@ from django.shortcuts import render,redirect
 from .models import Product_Variant
 from .models import Product
 from .forms import AddProductForm,AddProductVariantForm
+from django.contrib import messages
+
+
 # Create your views here.
 #-------------------------admin side views----------------------------------
 
 #view function for listing the products
 def admin_products_view(request):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
     query=request.GET.get('q')
     if query:
         products=Product.objects.filter(name__icontains=query)
@@ -16,6 +22,9 @@ def admin_products_view(request):
 
 #view fucntion for editing the product 
 def admin_edit_product_view(request,pk):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
     object=Product.objects.get(id=pk)
     if request.method == 'POST':
         form=AddProductForm(request.POST, instance = object)
@@ -28,6 +37,9 @@ def admin_edit_product_view(request,pk):
 
 #view function for adding new product
 def admin_add_product_view(request):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
     if request.method == 'POST':        
         form=AddProductForm(request.POST)
         if form.is_valid():
@@ -40,6 +52,9 @@ def admin_add_product_view(request):
 
 #view fucntion for listing product variants
 def admin_product_variants_view(request):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
     query=request.GET.get('q')
     if query:
         product_variants=Product_Variant.objects.filter(name__icontains=query)
@@ -49,6 +64,9 @@ def admin_product_variants_view(request):
 
 #view fucntion for editing the product variant 
 def admin_edit_product_variant_view(request,pk):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
     object=Product_Variant.objects.get(id=pk)
     if request.method == 'POST':
         form=AddProductVariantForm(request.POST, instance = object)
@@ -62,6 +80,9 @@ def admin_edit_product_variant_view(request,pk):
 
 #view function for adding new product variant
 def admin_add_product_variant_view(request):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
     if request.method == 'POST':        
         form=AddProductVariantForm(request.POST, request.FILES)
         if form.is_valid():
@@ -83,5 +104,10 @@ def all_products_view(request):
 #view function for viewing single product
 
 def single_product_view(request, pk):
-    product = Product_Variant.objects.get(id=pk)
-    return render(request, 'user_home/single_product.html', {'product': product})
+    product_variant = Product_Variant.objects.get(id=pk)
+    all_variants = Product_Variant.objects.filter(product_name = product_variant.product_name)
+    context = {
+        'product_variant': product_variant,
+        'all_variants': all_variants,
+    }
+    return render(request, 'user_home/single_product.html', context)

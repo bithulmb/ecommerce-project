@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from .models import Category
 from .forms import AddCategoryForm
+from django.contrib import messages
 
 
 
@@ -9,6 +10,9 @@ from .forms import AddCategoryForm
 
 #view function for listing categories and searching in category manangement page
 def admin_category_view(request):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
     query=request.GET.get('q')
     if query:
         categories=Category.objects.filter(name__icontains=query)
@@ -18,6 +22,9 @@ def admin_category_view(request):
 
 #view function for adding new category
 def admin_add_category_view(request):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
     if request.method == 'POST':        
         form=AddCategoryForm(request.POST)
         if form.is_valid():
@@ -30,6 +37,9 @@ def admin_add_category_view(request):
 
 #view function for editing category
 def admin_edit_category_view(request,pk):
+    if not (request.user.is_authenticated and request.user.is_superadmin):
+        messages.error(request,"You have not logged in. Please login to continue")
+        return redirect('admin_login')
     object=Category.objects.get(id=pk)
     if request.method == 'POST':
         form=AddCategoryForm(request.POST, instance = object)
