@@ -27,7 +27,7 @@ class Product(models.Model):
 
 class Product_Variant(models.Model):
     product_name    = models.ForeignKey(Product, on_delete=models.CASCADE)
-    size            = models.CharField(max_length=40, null=True)
+    size            = models.CharField(max_length=40, blank=True, null=True)
     price           = models.DecimalField(max_digits=8, decimal_places=2)
     stock           = models.PositiveIntegerField()
     thumbnail       = models.ImageField(upload_to="photos/thumbnail_images", null=True)
