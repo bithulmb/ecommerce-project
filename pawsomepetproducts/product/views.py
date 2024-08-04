@@ -3,12 +3,14 @@ from .models import Product_Variant
 from .models import Product
 from .forms import AddProductForm,AddProductVariantForm
 from django.contrib import messages
+from django.views.decorators.cache import never_cache
 
 
 # Create your views here.
 #-------------------------admin side views----------------------------------
 
 #view function for listing the products
+@never_cache
 def admin_products_view(request):
     if not (request.user.is_authenticated and request.user.is_superadmin):
         messages.error(request,"You have not logged in. Please login to continue")
@@ -21,6 +23,7 @@ def admin_products_view(request):
     return render(request, 'admin/admin_products.html', {'products': products})
 
 #view fucntion for editing the product 
+@never_cache
 def admin_edit_product_view(request,pk):
     if not (request.user.is_authenticated and request.user.is_superadmin):
         messages.error(request,"You have not logged in. Please login to continue")
@@ -36,6 +39,7 @@ def admin_edit_product_view(request,pk):
     return render(request, 'admin/admin_edit_product.html', {'form':form})
 
 #view function for adding new product
+@never_cache
 def admin_add_product_view(request):
     if not (request.user.is_authenticated and request.user.is_superadmin):
         messages.error(request,"You have not logged in. Please login to continue")
@@ -51,6 +55,7 @@ def admin_add_product_view(request):
 
 
 #view fucntion for listing product variants
+@never_cache
 def admin_product_variants_view(request):
     if not (request.user.is_authenticated and request.user.is_superadmin):
         messages.error(request,"You have not logged in. Please login to continue")
@@ -63,6 +68,7 @@ def admin_product_variants_view(request):
     return render(request, 'admin/admin_product_variants.html', {'product_variants': product_variants})
 
 #view fucntion for editing the product variant 
+@never_cache
 def admin_edit_product_variant_view(request,pk):
     if not (request.user.is_authenticated and request.user.is_superadmin):
         messages.error(request,"You have not logged in. Please login to continue")
@@ -79,6 +85,7 @@ def admin_edit_product_variant_view(request,pk):
 
 
 #view function for adding new product variant
+@never_cache
 def admin_add_product_variant_view(request):
     if not (request.user.is_authenticated and request.user.is_superadmin):
         messages.error(request,"You have not logged in. Please login to continue")
@@ -97,7 +104,7 @@ def admin_add_product_variant_view(request):
 
 #view function for all products page
 def all_products_view(request):
-    products = Product_Variant.objects.all()
+    products = Product_Variant.objects.all().distinct('product_name')
     return render(request, 'user_home/all_products.html', {'products': products})
 
 

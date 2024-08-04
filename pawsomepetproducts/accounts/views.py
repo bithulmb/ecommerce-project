@@ -1,9 +1,10 @@
 from django.shortcuts import render,redirect
 from .models import CustomUser
 from django.db.models import Q
-from .forms import RegisterForm,CustomUserUpdateForm
+from .forms import RegisterForm,CustomUserUpdateForm,UserProfileForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
+from django.views.decorators.cache import never_cache
 
 # Create your views here.
 
@@ -12,6 +13,7 @@ from django.contrib.auth import authenticate,login,logout
 #-------------------------Admin side views----------------------------------
 
 #view function for listing the users in admin panel
+@never_cache
 def admin_users_view(request):
     if not (request.user.is_authenticated and request.user.is_superadmin):
         messages.error(request,"You have not logged in. Please login to continue")
@@ -23,7 +25,7 @@ def admin_users_view(request):
         users=CustomUser.objects.filter(is_superadmin = False)
     return render(request, 'admin/admin_users.html', {'users':users})
 
-
+@never_cache
 def admin_edit_user_view(request, pk):
     if not (request.user.is_authenticated and request.user.is_superadmin):
         messages.error(request,"You have not logged in. Please login to continue")
@@ -43,7 +45,7 @@ def admin_edit_user_view(request, pk):
 # User side views
 
 #-------------------------User side views----------------------------------
-
+@never_cache
 def login_view(request):
 
      #if already loggedin redirect to home
@@ -63,7 +65,7 @@ def login_view(request):
             return redirect('login_page')
     return render(request,'user_home/login.html')
 
-
+@never_cache
 def signup_view(request):
     #if already loggedin redirect to home
     if request.user.is_authenticated:
@@ -84,9 +86,21 @@ def signup_view(request):
         else:
             return render(request,'user_home/signup.html',{'form': form})
 
-
+@never_cache
 def logout_view(request):
     logout(request)
     return redirect('home_page')
         
         
+#view for displaying user profile
+def user_profile_view(request):
+    object=CustomUser.objects.get(id=request.user.id)
+    if request.method == 'POST':
+        form=UserProfileForm(request.POST, instance = object)
+        if form.is_valid():
+            form.save()
+            messages.success(request,"User profile Updated succesfully")
+            return redirect('user_profile')
+    else:
+        form=UserProfileForm(instance = object)
+    return render(request,'user_home/user_profile.html', {'form':form})

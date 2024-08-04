@@ -84,9 +84,9 @@ $(document).ready(function() {
 				{% if user.is_authenticated %}
 				<small class="title text-muted">Welcome {{user.first_name}}</small>
 				<div> 
-					<a href="">My Profile</a> 
+					<a href="{% url 'user_profile' %}">My Profile</a> 
 					<span class="dark-transp"> | </span>
-					<a href="{% url 'logout_page' %}"> Log Out</a>
+					<a href="{% url 'logout_page' %}">Log Out</a>
 				</div>
 
 				{% else %}

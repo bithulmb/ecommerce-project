@@ -7,7 +7,7 @@ from django.contrib import messages
 
 #View function for displaying home page
 def home_view(request):
-    product_variants=Product_Variant.objects.all()
+    product_variants=Product_Variant.objects.all()[:8]
     return render(request,'user_home/home.html', {'product_variants': product_variants})
 
 #View function for displaying aboutus page
