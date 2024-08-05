@@ -5,6 +5,9 @@ from .forms import RegisterForm,CustomUserUpdateForm,UserProfileForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.views.decorators.cache import never_cache
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+
 
 # Create your views here.
 
@@ -104,3 +107,17 @@ def user_profile_view(request):
     else:
         form=UserProfileForm(instance = object)
     return render(request,'user_home/user_profile.html', {'form':form})
+
+
+#view for changing password of the user in profile section
+def user_change_password_view(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # To keep the user logged in
+            messages.success(request,"Your Password has been Changed Succesfully")
+            return redirect('change_password')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request,'user_home/change_password.html',{'form':form})

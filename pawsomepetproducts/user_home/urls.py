@@ -14,6 +14,7 @@ urlpatterns = [
     path('signup/', account_views.signup_view, name='signup_page'),
     path('logout/', account_views.logout_view, name='logout_page'),
     path('user/profile', account_views.user_profile_view, name='user_profile'),
+    path ('user/change-password',account_views.user_change_password_view, name='change_password'),
 
     #views from product app
     path('products/', product_views.all_products_view, name='all_products_page'),  #userside all products page
