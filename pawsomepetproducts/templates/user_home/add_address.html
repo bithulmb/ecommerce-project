@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y bg">
+
+    <div class="container">
+        <div class="row">
+        {% include 'user_home/user_dashboard.html' %}
+        <main class="col-md-9">
+            <article class="card">
+            <div class="card-body">
+                <!-- Alert box for displaying messages -->
+                {% if messages %}
+                <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+                {% for message in messages %}
+                    {{message}}
+                {% endfor %}                      
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                <header class=""><h2 class=" text-center ">Add a new Address</h2></header>
+    
+                <form method="POST" >
+                  {% csrf_token %}
+                  {{ form|crispy }}
+                  <button class="btn btn-primary" type="submit">Add</button>
+                  <a href="{% url 'user_addresses' %}" class="btn btn-secondary">Back</a>
+                 
+                </form>  
+            </div> <!-- card-body .// -->
+            </article> <!-- order-group.// --> 
+        </main>
+    </div> <!-- row.// -->
+    </div>
+    
+    
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+    
+    {% endblock %}

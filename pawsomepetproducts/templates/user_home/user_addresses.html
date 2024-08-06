@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y bg">
+
+    <div class="container">
+        <div class="row">
+        {% include 'user_home/user_dashboard.html' %}
+        <main class="col-md-9">
+            <article class="card">
+            <div class="card-body">
+               
+                <div class="col"><header class=""><h2 class=" text-center ">Saved Addresses</h2></header></div>
+                <div class="col text-end mb-4"><a href="{% url 'add_address' %}" class="btn btn-success"> Add New Adress</a></div>
+                   
+                 <!-- Alert box for displaying messages -->
+                 {% if messages %}
+                 <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+                 {% for message in messages %}
+                     {{message}}
+                 {% endfor %}                      
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                 </div>
+                 {% endif %}
+                
+                
+                <div class="row">
+                    {% for address in addresses %}
+                    <div class="col col-md-4">
+                        <div class="card mb-3 mb-lg-0">
+                            <!-- <div class="card-header">
+                                <div class="container">
+                                    <div class="row d-flex justify-content-start"></div>
+                                    <div class="col-auto"><h5>{{forloop.counter}}</h5></div>
+                                    
+                                  
+                                </div>
+                               
+                            </div> -->
+                            <div class="card-body">
+                                {% if address.is_default %}
+                                <div class="mb-2"><button class="btn-sm"><span class=" text-end">Default  <i class="bi bi-check-circle-fill"></i></span></button></div>                                      
+                                
+                                {% else %}
+                                <div class="mb-2"><button data-address="{{address.id}}" class="btn-sm default-address">Set As Default</button> </div>
+                                {% endif %}
+                                <address>
+                                    {{address.address_line1}}
+                                    <br>
+                                    {{address.address_line2}}
+                                     <br>
+                                     {{address.town}}
+                                      <br>
+                                      {{address.city}}
+                                      <br>
+                                      {{address.state}}
+                                      <br>
+                                      PIN -{{address.pincode}}
+                                      <br>
+                                      Contact -{{address.contact_number}}
+                                    </address>
+                                
+                                <a href="{% url 'edit_address' address.id %}" class="btn btn-small btn-primary">Edit</a>
+                                <a href="{% url 'delete_address' address.id %}"class="btn btn-small btn-secondary">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+           
+            </div> <!-- card-body .// -->
+            </article> <!-- order-group.// --> 
+        </main>
+    </div> <!-- row.// -->
+    </div>
+    
+    
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+    
+    {% endblock %}

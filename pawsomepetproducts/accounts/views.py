@@ -1,13 +1,15 @@
 from django.shortcuts import render,redirect
-from .models import CustomUser
+from .models import CustomUser,Address
 from django.db.models import Q
-from .forms import RegisterForm,CustomUserUpdateForm,UserProfileForm
+from .forms import RegisterForm,CustomUserUpdateForm,UserProfileForm,AddAddressForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 
@@ -121,3 +123,66 @@ def user_change_password_view(request):
     else:
         form = PasswordChangeForm(request.user)
     return render(request,'user_home/change_password.html',{'form':form})
+
+#view for adding new adress for user
+def user_add_address_view(request):
+    if request.method == 'POST':
+        form = AddAddressForm(request.POST)
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = request.user
+            address.save()
+            messages.success(request, 'Address added successfully!')
+            return redirect('user_addresses') 
+    else:
+        form=AddAddressForm()
+    return render(request,'user_home/add_address.html',{'form':form})
+
+
+#view function for listing addresses of user
+def user_addresses_view(request):
+    addresses=Address.objects.filter(user=request.user)
+    return render(request,'user_home/user_addresses.html',{'addresses':addresses})
+
+
+
+#view function for changing the default address when set default address button is pressed
+@csrf_exempt #The decorator marks a view as being exempt from the protection ensured by the middleware
+def user_set_default_address_view(request):
+    if request.method == 'POST':
+        address_id = request.POST.get('address_id')
+        user = request.user
+        
+        # Reset all addresses to non-default
+        Address.objects.filter(user=user, is_default=True).update(is_default=False)
+        
+        # Set the selected address as default
+        Address.objects.filter(id=address_id, user=user).update(is_default=True)
+        
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False}, status=400)
+
+#view function for editing address of user
+def user_edit_address_view(request,pk):
+    object=get_object_or_404(Address,id=pk)
+    if request.method == 'POST':
+        form=AddAddressForm(request.POST, instance=object)
+        if form.is_valid():
+            form.save()
+            messages.success(request,"User Address Updated Succesfully")
+            return redirect('user_addresses')
+    else:
+        form=AddAddressForm(instance=object)
+    return render(request, 'user_home/edit_address.html',{'form':form})    
+
+
+
+#view function for deleting address of user
+def user_delete_address_view(request,pk):
+    object=get_object_or_404(Address,id=pk)
+    if request.method == 'POST':
+        object.delete()
+        messages.success(request, 'Address deleted successfully.')
+        return redirect('user_addresses')
+    return render(request, 'user_home/confirm_delete_address.html', {'address': object})

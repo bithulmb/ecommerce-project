@@ -52,6 +52,24 @@ $(document).ready(function() {
 	} // end if
 
 
+    $('.default-address').on('click', function() {
+        var addressId = $(this).data('address');
+        $.ajax({
+            type: 'POST',
+            url: '{% url "set_default_address" %}',
+            data: {
+                'address_id': addressId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();  // Reload the page to update the default address display
+                } else {
+                    alert('Error setting default address');
+                }
+            }
+        });
+    });
 
 
     

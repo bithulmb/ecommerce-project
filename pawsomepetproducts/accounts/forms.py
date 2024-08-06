@@ -1,8 +1,10 @@
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser
+from .models import CustomUser,Address
 from django import forms
 from django.contrib.auth.forms import UserChangeForm
 import re
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Row, Column
 
 #User Sign Up Form
 class RegisterForm(UserCreationForm):
@@ -17,7 +19,7 @@ class RegisterForm(UserCreationForm):
     #phonenumber validator function    
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')
-        if phone_number and not re.match(r'^\+?1?\d{10,12}$', phonenumber):
+        if phone_number and not re.match(r'^\+?1?\d{10,12}$', phone_number):
             raise forms.ValidationError("Phone number can only contain digits and + sign. 10 to 12 digits allowed.")
         return phone_number
     
@@ -85,3 +87,11 @@ class UserProfileForm(forms.ModelForm):
         if not re.match(r'^[a-zA-Z\s]+$', last_name):
             raise forms.ValidationError('Name can only contain letters.')
         return last_name
+
+
+#Add address form for user
+class AddAddressForm(forms.ModelForm):
+    class Meta:
+        model=Address
+        exclude=['user','is_default']
+

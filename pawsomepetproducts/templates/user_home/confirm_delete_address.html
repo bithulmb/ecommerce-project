@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y bg">
+
+    <div class="container">
+        <div class="row">
+        {% include 'user_home/user_dashboard.html' %}
+        <main class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Confirm Deletion</h3>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the following address?</p>
+                    <address>
+                        {{ address.address_line1 }}<br>
+                        {{ address.address_line2 }}<br>
+                        {{ address.town }}<br>
+                        {{ address.city }}<br>
+                        {{ address.state }}<br>
+                        PIN - {{ address.pincode }}<br>
+                        Contact - {{ address.contact_number }}
+                    </address>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                        <a href="{% url 'user_addresses' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div> <!-- row.// -->
+    </div>
+    
+    
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+    
+
+{% endblock %}

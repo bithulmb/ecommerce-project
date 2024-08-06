@@ -4,10 +4,10 @@
         <a class="list-group-item" href="{% url 'user_profile' %}"> Edit Profile</a>
         <a class="list-group-item" href="{% url 'change_password' %}"> Change Password </a>
         <a class="list-group-item" href="#"> My Orders </a>
-        <a class="list-group-item" href="#"> My Addresses </a>
+        <a class="list-group-item" href="{% url 'user_addresses' %}"> My Addresses </a>
         <a class="list-group-item" href="#">Wallets </a>
     </ul>
     <br>
-    <a class="btn btn-light btn-block" href="{% url 'logout_page' %}"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a> 
+    <a class="btn btn-light btn-block link-danger" href="{% url 'logout_page' %}"> <i class="fa fa-power-off text-danger"></i> <span class=" h5 text text-danger">Log out</span> </a> 
     <!--   SIDEBAR .//END   -->
 </aside>

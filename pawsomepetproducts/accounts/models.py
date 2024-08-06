@@ -66,3 +66,16 @@ class CustomUser(AbstractBaseUser):
     def has_module_perms(self,add_label):
         return True
 
+class Address(models.Model):
+    user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    address_line1=models.CharField(max_length=50)
+    address_line2=models.CharField(max_length=50, blank=True)
+    town=models.CharField(max_length=40)
+    city=models.CharField(max_length=40)
+    state=models.CharField(max_length=40)
+    pincode=models.CharField(max_length=10)
+    contact_number=models.CharField(max_length=20)
+    is_default=models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"{self.address_line1},{self.town},{self.city}"
