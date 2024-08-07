@@ -1,10 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
-
+import secrets
 # Create your models here.
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, first_name, last_name, username, email, password = None):
+    def create_user(self, first_name, last_name,phone_number, email, password = None):
         if not email:
             raise ValueError('User must have an email address')
         # if not username:
@@ -15,6 +15,7 @@ class CustomUserManager(BaseUserManager):
             # username    = username,
             first_name  = first_name,
             last_name   = last_name,
+            phone_number=phone_number,
         )
 
         user.set_password(password)
@@ -79,3 +80,13 @@ class Address(models.Model):
 
     def __str__(self) -> str:
         return f"{self.address_line1},{self.town},{self.city}"
+    
+# class OTP(models.Model):
+#     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="otps")
+#     otp_code = models.CharField(max_length=6)
+#     tp_created_at = models.DateTimeField(auto_now_add=True)
+#     otp_expires_at = models.DateTimeField(blank=True, null=True)
+    
+    
+#     def __str__(self):
+#         return self.user.first_name

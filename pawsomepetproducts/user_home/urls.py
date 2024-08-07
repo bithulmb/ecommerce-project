@@ -10,9 +10,15 @@ urlpatterns = [
     path('contact/', views.contact_us_view, name='contact_us_page'),
 
     #views from account app
+            
     path('login/', account_views.login_view, name='login_page'),
-    path('signup/', account_views.signup_view, name='signup_page'),
     path('logout/', account_views.logout_view, name='logout_page'),
+            #registration section
+    path('signup/', account_views.signup_view, name='signup_page'),
+    path('verify-otp/', account_views.verify_otp_view, name='verify_otp'),
+
+
+            #user profile section
     path('user/profile/', account_views.user_profile_view, name='user_profile'),
     path ('user/change-password/',account_views.user_change_password_view, name='change_password'),
     path('user/addresses/',account_views.user_addresses_view,name='user_addresses'),

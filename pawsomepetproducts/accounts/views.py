@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from .models import CustomUser,Address
 from django.db.models import Q
-from .forms import RegisterForm,CustomUserUpdateForm,UserProfileForm,AddAddressForm
+from .forms import RegisterForm,CustomUserUpdateForm,UserProfileForm,AddAddressForm,OTPVerificationForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.views.decorators.cache import never_cache
@@ -10,6 +10,8 @@ from django.contrib.auth import update_session_auth_hash
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
+from .utils import generate_otp,send_otp_email
+from django.contrib.auth.hashers import make_password
 
 # Create your views here.
 
@@ -75,21 +77,85 @@ def signup_view(request):
     #if already loggedin redirect to home
     if request.user.is_authenticated:
         return redirect('home_page')
+       
     
-    #if request is get render the registration form
-    if request.method == 'GET':
-        form = RegisterForm()
-        return render(request,'user_home/signup.html', {'form':form})
-    
-    #if requet is POST check for form validation and save the details
+    #if request is POST check for form validation, send the otp and redirect to otp verification page
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "User created Succesfully. Please login")
-            return redirect('login_page')
+            user_data=form.cleaned_data # saving the validated form data dictionary
+            print(user_data)
+            otp=generate_otp() 
+            print(otp)
+            send_otp_email(user_data['email'],otp)
+            messages.success(request, "Check your mail and enter the otp verify registration ")
+            
+        
+            # Store user data and OTP in session securely
+            request.session['user_data'] = {
+                'first_name': user_data['first_name'],
+                'last_name': user_data['last_name'],
+                'email': user_data['email'],
+                'phone_number': user_data['phone_number'],
+                'password': user_data['password1'],
+            }
+         
+            request.session['otp'] = otp
+
+            return redirect('verify_otp')
         else:
             return render(request,'user_home/signup.html',{'form': form})
+    
+    else:
+        #if request is get render the registration form
+        form = RegisterForm()
+        return render(request,'user_home/signup.html', {'form':form})
+
+#view function for verifying the otp and saving the details of user to database
+def verify_otp_view(request):
+    if request.method == 'POST':
+        form = OTPVerificationForm(request.POST)
+        if form.is_valid():
+            print("otpform valid")
+            user_otp = form.cleaned_data['otp']
+            stored_otp = request.session.get('otp')
+            
+            if int(user_otp) == stored_otp:
+                print("otp correct")
+
+                # OTP is correct, proceed with registration
+                user_data = request.session.get('user_data')
+                print(f"user dta passowrd in verify is {user_data['password']}")
+                
+                
+                try:
+                    user = CustomUser.objects.create_user(
+                            first_name=user_data['first_name'],
+                            last_name=user_data['last_name'],
+                            email=user_data['email'],
+                            phone_number=user_data['phone_number'],
+                            password=user_data['password'],
+                    )
+                    
+                    # Clear session data
+                    del request.session['user_data']
+                    del request.session['otp']
+                   
+                    
+                    messages.success(request,"Verification Completed. Please lofin to continue")
+                    return redirect('login_page')
+                
+                except Exception as e:
+                   
+                    form.add_error(None, str(e))
+                
+                
+            else:
+                print("otp incorrect")
+                form.add_error('otp', 'Invalid OTP')
+    else:
+        form = OTPVerificationForm()
+    return render(request, 'user_home/verify_otp.html', {'form': form})
 
 @never_cache
 def logout_view(request):

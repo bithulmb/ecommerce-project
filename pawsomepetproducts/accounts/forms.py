@@ -15,6 +15,12 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = [ 'first_name', 'last_name','email','phone_number','password1', 'password2']
+
+    def __init__(self, *args, **kwargs):
+        super(RegisterForm, self).__init__(*args, **kwargs)
+        # Customize error messages for built-in fields
+        self.fields['email'].error_messages['required'] = 'Please enter your email address.'
+        self.fields['email'].error_messages['unique'] = 'This email address is already registered.'   
     
     #phonenumber validator function    
     def clean_phone_number(self):
@@ -94,4 +100,7 @@ class AddAddressForm(forms.ModelForm):
     class Meta:
         model=Address
         exclude=['user','is_default']
+
+class OTPVerificationForm(forms.Form):
+    otp=forms.CharField(label="Enter the OTP", max_length=10,min_length=6)
 

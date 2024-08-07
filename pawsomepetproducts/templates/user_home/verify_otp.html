@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-content">
+
+    <!-- ============================ COMPONENT REGISTER   ================================= -->
+        <div class="card mx-auto" style="max-width:520px; margin-top:40px;">
+          <article class="card-body">
+            <header class=""><h2 class=" text-center ">Verify Email</h2></header>
+            {% if messages %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {% for message in messages %}
+                {{message}}
+                {% endfor %}                      
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            <form method="POST" >
+              {% csrf_token %}
+              {{ form|crispy }} 
+              <div class="text-center mb-3">
+              <button class="btn btn-primary" type="submit">Verify</button>
+              </div>
+            </form>
+          
+             </div>
+            
+           
+            </article><!-- card-body.// -->
+        </div> <!-- card .// -->
+        <p class="text-center mt-4">OTP Not Recieved? <a href="">Resend OTP</a></p>
+        <br><br>
+    <!-- ============================ COMPONENT REGISTER  END.// ================================= -->
+    
+    
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+     
+{% endblock %}
