@@ -1,6 +1,8 @@
 from django.shortcuts import render,redirect
 from .models import Product_Variant
 from .models import Product
+from pet_type.models import PetType
+from category.models import Category
 from .forms import AddProductForm,AddProductVariantForm
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
@@ -104,8 +106,15 @@ def admin_add_product_variant_view(request):
 
 #view function for all products page
 def all_products_view(request):
-    products = Product_Variant.objects.all().distinct('product_name')
-    return render(request, 'user_home/all_products.html', {'products': products})
+    products = Product_Variant.objects.filter(is_active=True).distinct('product_name')
+    pet_types= PetType.objects.filter(is_active=True)
+    categories=Category.objects.filter(is_active=True)
+    context={
+        'products':products,
+        'pet_types' : pet_types,
+        'categories' : categories
+    }
+    return render(request, 'user_home/all_products.html', context)
 
 
 #view function for viewing single product
