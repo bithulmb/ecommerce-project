@@ -13,7 +13,7 @@ def generate_otp():
 #function for sending otp email to user
 def send_otp_email(email, otp):
     subject = 'Email Verification OTP'
-    message = f'Thanks for registering in Pawsome. Your OTP for email verification is: {otp}'
+    message = f'Hii There. \n \n Your OTP for email verification is: {otp}\n \n Best regards,\n Pawsome Pet Products'
     from_email = 'bithulmb07@gmail.com'
     recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)

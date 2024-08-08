@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from accounts import views as account_views
 from product import views as product_views
+from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
@@ -13,14 +14,25 @@ urlpatterns = [
             
     path('login/', account_views.login_view, name='login_page'),
     path('logout/', account_views.logout_view, name='logout_page'),
+
+        #reset password views
+    # path('forgot-password/', account_views.forgot_password_view, name='forgot-password'),
+    path('login/password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('login/password-reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('login/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('login/reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+
             #registration section
     path('signup/', account_views.signup_view, name='signup_page'),
     path('verify-otp/', account_views.verify_otp_view, name='verify_otp'),
+    path('resend-otp/', account_views.resend_otp_view, name='resend_otp'),
+    
+
 
 
             #user profile section
     path('user/profile/', account_views.user_profile_view, name='user_profile'),
-    path ('user/change-password/',account_views.user_change_password_view, name='change_password'),
+    path('user/change-password/',account_views.user_change_password_view, name='change_password'),
     path('user/addresses/',account_views.user_addresses_view,name='user_addresses'),
     path('user/add-address/',account_views.user_add_address_view,name='add_address'),
     path('user/set_default_address/', account_views.user_set_default_address_view, name='set_default_address'),

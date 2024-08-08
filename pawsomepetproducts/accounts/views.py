@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from .utils import generate_otp,send_otp_email
 from django.contrib.auth.hashers import make_password
+import time
 
 # Create your views here.
 
@@ -84,12 +85,11 @@ def signup_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user_data=form.cleaned_data # saving the validated form data dictionary
-            print(user_data)
-            otp=generate_otp() 
+            otp=generate_otp()
+            otp_created_at = int(time.time())  # Current timestamp 
             print(otp)
             send_otp_email(user_data['email'],otp)
             messages.success(request, "Check your mail and enter the otp verify registration ")
-            
         
             # Store user data and OTP in session securely
             request.session['user_data'] = {
@@ -101,6 +101,7 @@ def signup_view(request):
             }
          
             request.session['otp'] = otp
+            request.session['otp_created_at'] = otp_created_at
 
             return redirect('verify_otp')
         else:
@@ -116,17 +117,19 @@ def verify_otp_view(request):
     if request.method == 'POST':
         form = OTPVerificationForm(request.POST)
         if form.is_valid():
-            print("otpform valid")
             user_otp = form.cleaned_data['otp']
             stored_otp = request.session.get('otp')
+            otp_created_at = request.session.get('otp_created_at', 0)
+
+            #if otp is expired (after 3 minutes) send error message
+            if int(time.time()) - otp_created_at > 180: #(180 seconds)
+                form.add_error('otp', 'OTP has expired. Please request a new one.')
+                return render(request, 'user_home/verify_otp.html', {'form': form, 'otp_expired': True})
             
             if int(user_otp) == stored_otp:
-                print("otp correct")
 
                 # OTP is correct, proceed with registration
                 user_data = request.session.get('user_data')
-                print(f"user dta passowrd in verify is {user_data['password']}")
-                
                 
                 try:
                     user = CustomUser.objects.create_user(
@@ -142,7 +145,7 @@ def verify_otp_view(request):
                     del request.session['otp']
                    
                     
-                    messages.success(request,"Verification Completed. Please lofin to continue")
+                    messages.success(request,"Account created succesfully. Please login to continue")
                     return redirect('login_page')
                 
                 except Exception as e:
@@ -151,11 +154,33 @@ def verify_otp_view(request):
                 
                 
             else:
-                print("otp incorrect")
                 form.add_error('otp', 'Invalid OTP')
     else:
         form = OTPVerificationForm()
     return render(request, 'user_home/verify_otp.html', {'form': form})
+
+
+#view function for sending the otp again 
+def resend_otp_view(request):
+    user_data = request.session.get('user_data')
+    if user_data:
+        otp = generate_otp()
+        otp_created_at = int(time.time())
+        print(otp)
+        
+        send_otp_email(user_data['email'], otp)
+        
+        request.session['otp'] = otp
+        request.session['otp_created_at'] = otp_created_at
+        
+        messages.success(request, "A new OTP has been sent to your email.")
+    else:
+        messages.error(request, "User data not found. Please start the registration process again.")
+    
+    return redirect('verify_otp')
+
+def forgot_password_view(request):
+    pass
 
 @never_cache
 def logout_view(request):
