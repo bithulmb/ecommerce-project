@@ -15,8 +15,7 @@ urlpatterns = [
     path('login/', account_views.login_view, name='login_page'),
     path('logout/', account_views.logout_view, name='logout_page'),
 
-        #reset password views
-    # path('forgot-password/', account_views.forgot_password_view, name='forgot-password'),
+        #reset password views from django all auth views
     path('login/password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
     path('login/password-reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('login/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),

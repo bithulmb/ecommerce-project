@@ -35,11 +35,17 @@
 
 <!-- custom javascript -->
 <script src="{% static 'user/js/script.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+/// some script
 
 
-<script>
-	$(document).ready(function() {
-		$('.default-address').on('click', function() {
+
+
+// jquery ready start
+$(document).ready(function() {
+
+	// jQuery code 1 to select default address
+	$(".default-address").on('click', function() {
 			var addressId = $(this).data('address');
 			$.ajax({
 				type: 'POST',
@@ -57,17 +63,7 @@
 				}
 			});
 		});
-	});
-	</script>
-<script type="text/javascript">
-/// some script
-
-
-
-
-// jquery ready start
-$(document).ready(function() {
-	// jQuery code
+		//jQuery code 1 to select default address ends
 
 }); 
 // jquery end

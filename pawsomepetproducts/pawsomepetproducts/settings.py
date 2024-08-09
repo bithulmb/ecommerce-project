@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'active_link', #addedto make menu links active when it is selected
     
     #local
     'user_home',
@@ -110,18 +111,6 @@ WSGI_APPLICATION = 'pawsomepetproducts.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'ecommercedb',
-#         'USER': 'myuser',
-#         'PASSWORD': 'mypass',
-#         'HOST': 'localhost',
-#         'PORT': '',
-#     }
-# }
-
 
 DATABASES = {
     'default': {
