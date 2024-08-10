@@ -10,9 +10,9 @@
             <div class="card-body">
                 
                 <ul class="list-menu">
-                <li><a href="#">All  </a></li>
+                <li><a href="{% url 'all_products_page' %}">All  </a></li>
                 {% for pet_type in pet_types %}
-                <li><a href="#">{{pet_type.name}} </a></li>
+                <li><a href="{% url 'all_products_page' %}?pet_type={{ pet_type.id }}">{{pet_type.name}} </a></li>
                 
                 {% endfor %}
                 </ul>
@@ -31,9 +31,9 @@
             <div class="card-body">
                 
                 <ul class="list-menu">
-                <li><a href="#">All </a></li>
+                <li><a href="{% url 'all_products_page' %}">All </a></li>
                 {% for category in categories %}
-                <li><a href="#">{{category.name}} </a></li>
+                <li><a href="{% url 'all_products_page' %}?category={{ category.id }}">{{category.name}} </a></li>
                 
                 {% endfor %}
                 </ul>

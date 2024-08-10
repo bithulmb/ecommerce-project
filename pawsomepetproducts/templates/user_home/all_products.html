@@ -26,10 +26,27 @@
         <main class="col-md-9">
     
     <header class="border-bottom mb-4 pb-3">
-            <div class="form-inline">
-                <span class="mr-md-auto">32 Items found </span>
+          <div class="row">
+            <div class=" col form-inline">
+                <span class="mr-md-auto">{{count}} Items found </span>
                 
             </div>
+            <div class="col text-end">
+                <form method="GET" id="sortForm">
+    <select name="sort_by" onchange="document.getElementById('sortForm').submit();">
+        <option value="">Sort By</option>
+        <!-- <option value="popularity">Popularity</option> -->
+        <option value="price_low_high">Price: Low to High</option>
+        <option value="price_high_low">Price: High to Low</option>
+        <!-- <option value="average_rating">Average Rating</option> -->
+        <!-- <option value="featured">Featured</option>
+        <option value="new_arrivals">New Arrivals</option> -->
+        <option value="az">A - Z</option>
+        <option value="za">Z - A</option>
+    </select>
+</form>
+            </div>
+          </div>
     </header><!-- sect-heading -->
     
     <div class="row">
@@ -37,6 +54,7 @@
 
 
         <div class="col-md-4">
+            <a href="{% url 'single_product_page' product.id %}">
             <figure class="card card-product-grid">
                 <div class="img-wrap"> 
                     
@@ -58,6 +76,7 @@
                     <a href="{% url 'single_product_page' product.id %}" class="btn btn-block btn-success">View Product </a>
                 </figcaption>
             </figure>
+        </a>
         </div> <!-- col.// -->
         {% endfor %}
         

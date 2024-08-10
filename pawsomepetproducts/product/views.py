@@ -1,11 +1,12 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from .models import Product_Variant
 from .models import Product
 from pet_type.models import PetType
 from category.models import Category
-from .forms import AddProductForm,AddProductVariantForm
+from .forms import AddProductForm,AddProductVariantForm,AddProductImages
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
+
 
 
 # Create your views here.
@@ -101,18 +102,53 @@ def admin_add_product_variant_view(request):
         form=AddProductVariantForm()
     return render(request, 'admin/admin_add_product_variant.html', {'form':form})
 
+#view for adding images for product variants
+def admin_add_product_images_view(request, variant_id):
+    variant = get_object_or_404(Product_Variant, id=variant_id)
+    
+    if request.method == 'POST':
+        form = AddProductImages(request.POST, request.FILES)
+        if form.is_valid():
+            image = form.save(commit=False)
+            image.product_variant = variant
+            image.save()
+            return redirect('admin_product_variants')  # Redirect to the variants page
+    else:
+        form = AddProductImages()
+    
+    return render(request, 'admin/add_product_images.html', {'form': form, 'variant': variant})
 
 #-------------------------user side views----------------------------------
 
 #view function for all products page
 def all_products_view(request):
-    products = Product_Variant.objects.filter(is_active=True).distinct('product_name')
+    pet_type_id=request.GET.get('pet_type')
+    category_id=request.GET.get('category')
+    sort_by = request.GET.get('sort_by')
+
+    products = Product_Variant.objects.filter(is_active=True)
+
+    if pet_type_id:
+        products = Product_Variant.objects.filter(is_active=True).filter(product_name__pet_type__id=pet_type_id)
+    if category_id:
+         products = Product_Variant.objects.filter(is_active=True).filter(product_name__category__id=category_id)
+
+    if sort_by=='price_low_high':
+        products=products.order_by('price')
+    elif sort_by=='price_high_low':
+        products=products.order_by('-price')
+    elif sort_by=='az':
+        products=products.order_by('product_name__name')
+    elif sort_by=='za':
+        products=products.order_by('-product_name__name')
+
     pet_types= PetType.objects.filter(is_active=True)
     categories=Category.objects.filter(is_active=True)
     context={
         'products':products,
         'pet_types' : pet_types,
-        'categories' : categories
+        'categories' : categories,
+        'count' :products.count()  
     }
     return render(request, 'user_home/all_products.html', context)
 

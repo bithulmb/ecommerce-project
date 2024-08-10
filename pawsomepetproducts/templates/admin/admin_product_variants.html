@@ -65,6 +65,7 @@
                             <td class="align-middle">{{product_variant.is_active}}</td>
                             <td class="align-middle">
                                 <a href="{% url 'admin_edit_product_variant' product_variant.id %}"class="btn btn-md rounded font-sm">Edit</a>
+                                <a href="{% url 'admin_add_product_images' product_variant.id %}" class="btn btn-md rounded font-sm">Add Images</a>
                             </td>
                         </tr>
                         {% endfor %}

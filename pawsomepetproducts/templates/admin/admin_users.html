@@ -46,10 +46,11 @@
                             <th scope="col">ID</th>
                             <th scope="col">Name</th>
                             <th scope="col">Email</th>
-                            <!-- <th scope="col">Mobile Number</th> -->
+                            <th scope="col">Mobile Number</th>
                             <th scope="col">Date Joined</th>
                             <th scope="col">Last Login</th>
                             <th scope="col">Is Active</th>
+                            <th scope="col">Is Blocked</th>
                             <th scope="col" class="text-end"> Action </th>
                         </tr>
                     </thead>
@@ -60,10 +61,11 @@
                             <td>{{user.id}}</td>
                             <td><b>{{user.first_name}} {{user.last_name}}</b></td>
                             <td>{{user.email}}</td>
-                            <!-- <td>{{user.phone_number}}</td> -->
+                            <td>{{user.phone_number}}</td>
                             <td>{{user.date_joined}}</td>
                             <td>{{user.last_login}}</td>
                             <td>{{user.is_active}}</td>
+                            <td>{{user.is_blocked}}</td>
                             <td class="text-end">
                                 <a href="{% url 'admin_edit_user' user.id %}" class="btn btn-md rounded font-sm">Edit Status</a>
                             </td>

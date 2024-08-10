@@ -3,40 +3,42 @@
 {% block content %}
 {% load crispy_forms_tags %}
 
+<!-- <section class="content-main">
 
-<!-- <div class="card">
-    <div class="card-body">
-        <div class="row d-flex justify-content-center">
-            <div class="col-md-3">
-                <form>
-                    <div class="mb-4">
-                        <label for="product_name" class="form-label">Name</label>
-                        <input type="text" placeholder="Type here" class="form-control" id="product_name" />
-                    </div>
-                    <div class="mb-4">
-                        <label for="product_slug" class="form-label">Slug</label>
-                        <input type="text" placeholder="Type here" class="form-control" id="product_slug" />
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label">Parent</label>
-                        <select class="form-select">
-                            <option>Clothes</option>
-                            <option>T-Shirts</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label">Description</label>
-                        <textarea placeholder="Type here" class="form-control"></textarea>
-                    </div>
-                    <div class="d-grid">
-                        <button class="btn btn-primary">Create category</button>
-                    </div>
-                </form>
+    <div class="card mx-auto" style="max-width:720px; margin-top:40px;">
+        <article class="card-body">
+          <header class=""><h2 class=" text-center ">Add Product Variant</h2></header>
+    
+          <form id="product-variant-form" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }} -->
+            
+            <!-- Image Upload and Crop Section -->
+            <!-- <div class="form-group">
+                <label for="id_thumbnail">Thumbnail</label>
+                <input type="file" id="thumbnail-input" name="thumbnail" accept="image/*" class="form-control">
+            </div> -->
+            
+            <!-- Image Preview -->
+            <!-- <div id="image-preview-container">
+                <img id="image-preview" style="max-width: 100%; display:none;">
+            </div> -->
+            
+            <!-- Cropper Container -->
+            <!-- <div id="cropper-container" style="display:none;">
+                <img id="image-cropper" style="max-width: 100%;">
             </div>
-        </div>
-    </div>
-</div> -->
+            
+            <button class="btn btn-primary" type="submit">Add</button>
+            <a class="btn btn-secondary" href="{% url 'admin_product_variants' %}">Back</a>
+          </form>
+          
+          </article>
+      </div> 
+    </section> -->
 
+
+ 
 <section class="content-main">
 
 <div class="card mx-auto" style="max-width:520px; margin-top:40px;">
@@ -52,8 +54,8 @@
       
       
      
-      </article><!-- card-body.// -->
-  </div> <!-- card .// -->
+      </article>
+  </div>
 </section>
 
 
