@@ -6,7 +6,7 @@ from category.models import Category
 from .forms import AddProductForm,AddProductVariantForm,AddProductImages
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
-
+from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
 
 
 # Create your views here.
@@ -144,8 +144,14 @@ def all_products_view(request):
 
     pet_types= PetType.objects.filter(is_active=True)
     categories=Category.objects.filter(is_active=True)
+
+    #for paginator
+    paginator=Paginator(products,6)
+    page=request.GET.get('page')
+    paged_products=paginator.get_page(page)
+
     context={
-        'products':products,
+        'products': paged_products,
         'pet_types' : pet_types,
         'categories' : categories,
         'count' :products.count()  

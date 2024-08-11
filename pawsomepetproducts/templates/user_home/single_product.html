@@ -97,10 +97,15 @@
                         <div class="mb-3"> 
                             <var class="price h4">₹ {{ product_variant.price }}</var> 
                         </div> 
+                        {% if product_variant.stock > 0 %}
                         <a href="./product-detail.html" class="btn btn-primary"> 
                             <span class="text">Add to cart</span><i class="fas fa-shopping-cart"></i>  
                         </a>
-                        <a href="./product-detail.html" class="btn btn-secondary"> 
+                        {% else %}
+                        <div class="btn btn-secondary">Out of Stock</div>
+                        {% endif %}
+
+                        <a href="./product-detail.html" class="btn btn-warning"> 
                             <span class="text">Add to Wishlist</span><i class="fas fa-heart"></i>  
                         </a>
                     </article> <!-- product-info-aside .// -->
