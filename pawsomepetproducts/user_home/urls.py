@@ -2,7 +2,9 @@ from django.urls import path
 from . import views
 from accounts import views as account_views
 from product import views as product_views
+from cart import views as cart_views
 from django.contrib.auth import views as auth_views
+
 
 
 urlpatterns = [
@@ -42,5 +44,12 @@ urlpatterns = [
     #views from product app
     path('products/', product_views.all_products_view, name='all_products_page'),  #userside all products page
     path('products/<int:pk>',product_views.single_product_view, name='single_product_page'),
+
+    #views from cart app
+    path('cart/', cart_views.cart_view, name='cart_page'),
+    path('cart/add/<int:variant_id>', cart_views.add_to_cart_view, name='add_to_cart'),
+    path('cart/remove/<int:variant_id>', cart_views.remove_from_cart_view, name='remove_from_cart'),
+    path('cart/delete/<int:variant_id>', cart_views.delete_cart_item_view, name='delete_cart_item'),
+
     
 ]

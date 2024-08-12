@@ -2,13 +2,13 @@ from django.shortcuts import render,redirect
 from .models import PetType
 from .forms import AddPetTypeForm
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+
 # Create your views here.
 
 #view function for the listing of the pet types and searching pet types
+@staff_member_required(login_url="admin_login")
 def admin_pet_type_view(request):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     query=request.GET.get('q')
     if query:
         pet_types=PetType.objects.filter(name__icontains=query)
@@ -18,10 +18,8 @@ def admin_pet_type_view(request):
 
 
 #view function for adding pet type
+@staff_member_required(login_url="admin_login")
 def admin_add_pet_type_view(request):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     if request.method == 'POST':        
         form=AddPetTypeForm(request.POST)
         if form.is_valid():
@@ -33,10 +31,8 @@ def admin_add_pet_type_view(request):
 
 
 #view function for editing the pet types.
+@staff_member_required(login_url="admin_login")
 def admin_edit_pet_type_view(request,pk):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     object=PetType.objects.get(id=pk)
     if request.method == 'POST':
         form=AddPetTypeForm(request.POST, instance = object)

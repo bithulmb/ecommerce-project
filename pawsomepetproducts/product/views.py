@@ -7,6 +7,9 @@ from .forms import AddProductForm,AddProductVariantForm,AddProductImages
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
+from cart.models import CartItem
+from cart.views import _cart_id
+from django.contrib.admin.views.decorators import staff_member_required
 
 
 # Create your views here.
@@ -14,10 +17,8 @@ from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
 
 #view function for listing the products
 @never_cache
+@staff_member_required(login_url="admin_login")
 def admin_products_view(request):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     query=request.GET.get('q')
     if query:
         products=Product.objects.filter(name__icontains=query)
@@ -27,10 +28,8 @@ def admin_products_view(request):
 
 #view fucntion for editing the product 
 @never_cache
+@staff_member_required(login_url="admin_login")
 def admin_edit_product_view(request,pk):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     object=Product.objects.get(id=pk)
     if request.method == 'POST':
         form=AddProductForm(request.POST, instance = object)
@@ -43,10 +42,8 @@ def admin_edit_product_view(request,pk):
 
 #view function for adding new product
 @never_cache
+@staff_member_required(login_url="admin_login")
 def admin_add_product_view(request):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     if request.method == 'POST':        
         form=AddProductForm(request.POST)
         if form.is_valid():
@@ -59,10 +56,8 @@ def admin_add_product_view(request):
 
 #view fucntion for listing product variants
 @never_cache
+@staff_member_required(login_url="admin_login")
 def admin_product_variants_view(request):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     query=request.GET.get('q')
     if query:
         product_variants=Product_Variant.objects.filter(name__icontains=query)
@@ -72,10 +67,8 @@ def admin_product_variants_view(request):
 
 #view fucntion for editing the product variant 
 @never_cache
+@staff_member_required(login_url="admin_login")
 def admin_edit_product_variant_view(request,pk):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     object=Product_Variant.objects.get(id=pk)
     if request.method == 'POST':
         form=AddProductVariantForm(request.POST, instance = object)
@@ -89,10 +82,8 @@ def admin_edit_product_variant_view(request,pk):
 
 #view function for adding new product variant
 @never_cache
+@staff_member_required(login_url="admin_login")
 def admin_add_product_variant_view(request):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     if request.method == 'POST':        
         form=AddProductVariantForm(request.POST, request.FILES)
         if form.is_valid():
@@ -103,6 +94,7 @@ def admin_add_product_variant_view(request):
     return render(request, 'admin/admin_add_product_variant.html', {'form':form})
 
 #view for adding images for product variants
+@staff_member_required(login_url="admin_login")
 def admin_add_product_images_view(request, variant_id):
     variant = get_object_or_404(Product_Variant, id=variant_id)
     
@@ -126,7 +118,7 @@ def all_products_view(request):
     category_id=request.GET.get('category')
     sort_by = request.GET.get('sort_by')
 
-    products = Product_Variant.objects.filter(is_active=True)
+    products = Product_Variant.objects.filter(is_active=True).order_by('id')
 
     if pet_type_id:
         products = Product_Variant.objects.filter(is_active=True).filter(product_name__pet_type__id=pet_type_id)
@@ -160,12 +152,13 @@ def all_products_view(request):
 
 
 #view function for viewing single product
-
 def single_product_view(request, pk):
     product_variant = Product_Variant.objects.get(id=pk)
     all_variants = Product_Variant.objects.filter(product_name = product_variant.product_name)
+    in_cart=CartItem.objects.filter(cart__cart_id=_cart_id(request),variant=product_variant).exists() #checking if the item is already added to the cart   
     context = {
         'product_variant': product_variant,
         'all_variants': all_variants,
+        'in_cart'   : in_cart
     }
     return render(request, 'user_home/single_product.html', context)

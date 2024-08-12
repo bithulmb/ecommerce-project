@@ -13,7 +13,8 @@ from django.shortcuts import get_object_or_404
 from .utils import generate_otp,send_otp_email
 from django.contrib.auth.hashers import make_password
 import time
-
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 
@@ -22,10 +23,8 @@ import time
 
 #view function for listing the users in admin panel
 @never_cache
+@staff_member_required(login_url="admin_login")
 def admin_users_view(request):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     query=request.GET.get('q')
     if query:   #if there is search query
         users=CustomUser.objects.filter(is_superadmin = False).filter(Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query))
@@ -34,10 +33,8 @@ def admin_users_view(request):
     return render(request, 'admin/admin_users.html', {'users':users})
 
 @never_cache
+@staff_member_required(login_url="admin_login")
 def admin_edit_user_view(request, pk):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     object=CustomUser.objects.get(id=pk)
     if request.method == 'POST':
         form=CustomUserUpdateForm(request.POST, instance = object)
@@ -189,6 +186,7 @@ def logout_view(request):
         
         
 #view for displaying user profile
+@login_required(login_url='login_page')
 def user_profile_view(request):
     object=CustomUser.objects.get(id=request.user.id)
     if request.method == 'POST':
@@ -203,6 +201,7 @@ def user_profile_view(request):
 
 
 #view for changing password of the user in profile section
+@login_required(login_url='login_page')
 def user_change_password_view(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
@@ -216,6 +215,7 @@ def user_change_password_view(request):
     return render(request,'user_home/change_password.html',{'form':form})
 
 #view for adding new adress for user
+@login_required(login_url='login_page')
 def user_add_address_view(request):
     if request.method == 'POST':
         form = AddAddressForm(request.POST)
@@ -231,6 +231,7 @@ def user_add_address_view(request):
 
 
 #view function for listing addresses of user
+@login_required(login_url='login_page')
 def user_addresses_view(request):
     addresses=Address.objects.filter(user=request.user)
     return render(request,'user_home/user_addresses.html',{'addresses':addresses})
@@ -238,6 +239,7 @@ def user_addresses_view(request):
 
 
 #view function for changing the default address when set default address button is pressed
+@login_required(login_url='login_page')
 @csrf_exempt #The decorator marks a view as being exempt from the protection ensured by the middleware
 def user_set_default_address_view(request):
     if request.method == 'POST':
@@ -255,6 +257,7 @@ def user_set_default_address_view(request):
     return JsonResponse({'success': False}, status=400)
 
 #view function for editing address of user
+@login_required(login_url='login_page')
 def user_edit_address_view(request,pk):
     object=get_object_or_404(Address,id=pk)
     if request.method == 'POST':

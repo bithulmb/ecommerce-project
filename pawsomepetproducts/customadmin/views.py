@@ -4,7 +4,9 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from django.conf import settings
-
+from .decorators import superuser_required
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 
 
 
@@ -40,10 +42,8 @@ def admin_login_view(request):
 
 #view function of dashboard page after logging in
 @never_cache
+@staff_member_required(login_url="admin_login")
 def admin_dashboard_view(request):
-    if not (request.user.is_authenticated and request.user.is_superadmin):
-        messages.error(request,"You have not logged in. Please login to continue")
-        return redirect('admin_login')
     return render(request, 'admin/admin_dashboard.html')
 
 

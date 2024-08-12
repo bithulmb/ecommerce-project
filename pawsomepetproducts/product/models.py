@@ -34,7 +34,7 @@ class Product_Variant(models.Model):
     is_active       = models.BooleanField(default=True)
 
     def __str__(self) -> str:
-        return f"{self.product_name.name} {self.size}"
+        return str(f"{self.product_name.name} {self.size}")
     
 
 

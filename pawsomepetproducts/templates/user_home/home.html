@@ -29,9 +29,9 @@
         {% for product_variant in product_variants %}
         <div class="col-md-3">
             <div class="card card-product-grid">
-                <a href="#" class="img-wrap"> <img src="{{product_variant.thumbnail.url}}"> </a>
+                <a href="{% url 'single_product_page' product_variant.id %}" class="img-wrap"> <img src="{{product_variant.thumbnail.url}}"> </a>
                 <figcaption class="info-wrap">
-                    <a href="" class="title">{{product_variant.product_name.name}}</a>
+                    <a href="{% url 'single_product_page' product_variant.id %}" class="title">{{product_variant.product_name.name}}</a>
                     <div class="price mt-1">₹ {{product_variant.price}}</div> <!-- price-wrap.// -->
                 </figcaption>
             </div>
