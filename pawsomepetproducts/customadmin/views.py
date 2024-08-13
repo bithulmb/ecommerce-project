@@ -7,7 +7,7 @@ from django.conf import settings
 from .decorators import superuser_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-
+import requests
 
 
 # Create your views here.
@@ -29,6 +29,17 @@ def admin_login_view(request):
         if user is not None:
             if user.is_superadmin:
                 login(request,user)
+
+                #for redirecting to the url mentioned in next while logging in
+                url=request.META.get('HTTP_REFERER')
+                try:
+                    query=requests.utils.urlparse(url).query
+                    params=dict(x.split("=") for x in query.split("&"))
+                    if 'next' in params:
+                        nextPage=params['next']
+                        return redirect(nextPage)
+                except:
+                    pass
                 return redirect('admin_dashboard')
             else:
                 messages.error(request,'You are not authorised to access the details')

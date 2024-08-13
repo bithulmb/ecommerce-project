@@ -10,6 +10,7 @@ from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
 from cart.models import CartItem
 from cart.views import _cart_id
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Q
 
 
 # Create your views here.
@@ -119,7 +120,7 @@ def all_products_view(request):
     sort_by = request.GET.get('sort_by')
 
     products = Product_Variant.objects.filter(is_active=True).order_by('id')
-
+    
     if pet_type_id:
         products = Product_Variant.objects.filter(is_active=True).filter(product_name__pet_type__id=pet_type_id)
     if category_id:
@@ -162,3 +163,56 @@ def single_product_view(request, pk):
         'in_cart'   : in_cart
     }
     return render(request, 'user_home/single_product.html', context)
+
+
+# view function for searching products through search bar
+def search_products_view(request):
+    keyword = request.GET.get('keyword', '')
+    pet_type_filter = request.GET.getlist('pet_type')
+    category_filter = request.GET.getlist('category')
+    sort_by = request.GET.get('sort_by', '')
+
+    products = Product_Variant.objects.filter(is_active=True)
+
+    if keyword:
+        products = products.filter(
+            Q(product_name__description__icontains=keyword) |
+            Q(product_name__name__icontains=keyword)
+        )
+
+    if pet_type_filter:
+        products = products.filter(product_name__pet_type__id__in=pet_type_filter)
+
+    if category_filter:
+        products = products.filter(product_name__category__id__in=category_filter)
+
+    # Sorting logic
+    if sort_by == 'price_low_high':
+        products = products.order_by('price')
+    elif sort_by == 'price_high_low':
+        products = products.order_by('-price')
+    # elif sort_by == 'average_rating':
+    #     products = products.order_by('-average_rating')
+    # elif sort_by == 'new_arrivals':
+    #     products = products.order_by('-created_at')
+    elif sort_by == 'az':
+        products = products.order_by('product_name__name')
+    elif sort_by == 'za':
+        products = products.order_by('-product_name__name')
+    # elif sort_by == 'popularity':
+    #     products = products.order_by('-popularity')
+    # elif sort_by == 'featured':
+    #     products = products.filter(is_featured=True)
+
+    context = {
+        'products': products,
+        'count': products.count(),
+        'keyword': keyword,
+        'pet_types': PetType.objects.filter(is_active=True),
+        'categories': Category.objects.filter(is_active=True),
+        'selected_pet_types': pet_type_filter,
+        'selected_categories': category_filter,
+        'sort_by': sort_by,  
+    }
+
+    return render(request, 'user_home/search_products.html', context)

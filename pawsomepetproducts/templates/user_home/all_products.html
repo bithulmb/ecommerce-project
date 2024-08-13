@@ -7,7 +7,9 @@
 <!-- ========================= SECTION PAGETOP ========================= -->
 <section class="section-pagetop bg">
     <div class="container">
+      
         <h1 class="title-page text-center">All Products</h1>
+       
         
     </div> <!-- container //  -->
     </section>
@@ -36,13 +38,13 @@
     <select name="sort_by" onchange="document.getElementById('sortForm').submit();">
         <option value="">Sort By</option>
         <!-- <option value="popularity">Popularity</option> -->
-        <option value="price_low_high">Price: Low to High</option>
-        <option value="price_high_low">Price: High to Low</option>
+        <option value="price_low_high" {% if request.GET.sort_by == 'price_low_high' %}selected{% endif %} >Price: Low to High</option>
+        <option value="price_high_low" {% if request.GET.sort_by == 'price_high_low' %}selected{% endif %}>Price: High to Low</option>
         <!-- <option value="average_rating">Average Rating</option> -->
         <!-- <option value="featured">Featured</option>
         <option value="new_arrivals">New Arrivals</option> -->
-        <option value="az">A - Z</option>
-        <option value="za">Z - A</option>
+        <option value="az" {% if request.GET.sort_by == 'az' %}selected{% endif %}>A - Z</option>
+        <option value="za"{% if request.GET.sort_by == 'za' %}selected{% endif %}>Z - A</option>
     </select>
 </form>
             </div>

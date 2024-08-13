@@ -12,7 +12,7 @@
                 <ul class="list-menu">
                 <li><a href="{% url 'all_products_page' %}">All  </a></li>
                 {% for pet_type in pet_types %}
-                <li><a href="{% url 'all_products_page' %}?pet_type={{ pet_type.id }}">{{pet_type.name}} </a></li>
+                <li><a href="{% url 'all_products_page' %}?pet_type={{ pet_type.id }}" class="{% if request.GET.pet_type|stringformat:'s' == pet_type.id|stringformat:'s' %} fw-bold text-dark{% endif %}" >{{pet_type.name}} </a></li>
                 
                 {% endfor %}
                 </ul>
@@ -33,7 +33,7 @@
                 <ul class="list-menu">
                 <li><a href="{% url 'all_products_page' %}">All </a></li>
                 {% for category in categories %}
-                <li><a href="{% url 'all_products_page' %}?category={{ category.id }}">{{category.name}} </a></li>
+                <li><a href="{% url 'all_products_page' %}?category={{ category.id }}" class="{% if request.GET.category|stringformat:'s' == category.id|stringformat:'s' %} fw-bold text-dark{% endif %}">{{category.name}} </a></li>
                 
                 {% endfor %}
                 </ul>
@@ -42,7 +42,7 @@
         </div>
     </article> <!-- filter-group  .// -->
     
-    <article class="filter-group">
+    <!-- <article class="filter-group">
         <header class="card-header">
             <a href="#" data-toggle="collapse" data-target="#collapse_3" aria-expanded="true" class="">
                 <i class="icon-control fa fa-chevron-down"></i>
@@ -55,7 +55,7 @@
                 <div class="form-row">
                 <div class="form-group col-md-6">
                   <label>Min</label>
-                  <!-- <input class="form-control" placeholder="$0" type="number"> -->
+                 
                       <select class="mr-2 form-control">
                         <option value="0">₹ 0</option>
                         <option value="50">₹ 100</option>
@@ -77,10 +77,10 @@
                         <option value="1000">₹ 10000</option>
                     </select>
                 </div>
-                </div> <!-- form-row.// -->
+                </div> 
                 <button class="btn btn-block btn-primary">Apply</button>
-            </div><!-- card-body.// -->
+            </div>
         </div>
-    </article> <!-- filter-group .// -->
+    </article> -->
     
 </div> <!-- card.// -->

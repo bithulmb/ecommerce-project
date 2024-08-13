@@ -15,6 +15,10 @@ from django.contrib.auth.hashers import make_password
 import time
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from cart.models import Cart,CartItem
+from cart.views import _cart_id
+import requests
+
 # Create your views here.
 
 
@@ -61,9 +65,36 @@ def login_view(request):
     if request.method=="POST":
         email       = request.POST.get("email")
         password    = request.POST.get("password")
+       
         user        = authenticate(request, email=email, password=password)
+       
         if user is not None:
+            #checking whether there are any items in cart in current session
+            try:
+                cart=Cart.objects.get(cart_id=_cart_id(request))
+                is_cart_item_exists=CartItem.objects.filter(cart=cart).exists()
+                if is_cart_item_exists:
+                    cart_item=CartItem.objects.filter(cart=cart)
+                    for item in cart_item:
+                        item.user=user
+                        item.save()
+
+            except:
+                pass
+
             login(request,user)
+
+            #for redirecting to the url mentioned in next while logging in
+            url=request.META.get('HTTP_REFERER')
+            try:
+                query=requests.utils.urlparse(url).query
+                params=dict(x.split("=") for x in query.split("&"))
+                if 'next' in params:
+                    nextPage=params['next']
+                    return redirect(nextPage)
+            except:
+                pass
+            
             return redirect('home_page')
         else:
             messages.error(request,"Invalid Credentials. Try Again")
@@ -86,9 +117,9 @@ def signup_view(request):
             otp_created_at = int(time.time())  # Current timestamp 
             print(otp)
             send_otp_email(user_data['email'],otp)
-            messages.success(request, "Check your mail and enter the otp verify registration ")
+            messages.success(request, "Check your mail and enter the otp for continuing registration ")
         
-            # Store user data and OTP in session securely
+            # Store user data and OTP in session 
             request.session['user_data'] = {
                 'first_name': user_data['first_name'],
                 'last_name': user_data['last_name'],
@@ -160,15 +191,15 @@ def verify_otp_view(request):
 #view function for sending the otp again 
 def resend_otp_view(request):
     user_data = request.session.get('user_data')
-    if user_data:
+    if user_data: #verify whether the session data is available
         otp = generate_otp()
         otp_created_at = int(time.time())
         print(otp)
         
-        send_otp_email(user_data['email'], otp)
+        send_otp_email(user_data['email'], otp) #generate and send a new otp to user email
         
         request.session['otp'] = otp
-        request.session['otp_created_at'] = otp_created_at
+        request.session['otp_created_at'] = otp_created_at #stores new otp and otp creation time in session
         
         messages.success(request, "A new OTP has been sent to your email.")
     else:
@@ -176,9 +207,7 @@ def resend_otp_view(request):
     
     return redirect('verify_otp')
 
-def forgot_password_view(request):
-    pass
-
+#view function forlogging out user
 @never_cache
 def logout_view(request):
     logout(request)
@@ -220,9 +249,9 @@ def user_add_address_view(request):
     if request.method == 'POST':
         form = AddAddressForm(request.POST)
         if form.is_valid():
-            address = form.save(commit=False)
+            address = form.save(commit=False) #temporarly saves the form
             address.user = request.user
-            address.save()
+            address.save()  #adds the id of user and saves the address
             messages.success(request, 'Address added successfully!')
             return redirect('user_addresses') 
     else:
