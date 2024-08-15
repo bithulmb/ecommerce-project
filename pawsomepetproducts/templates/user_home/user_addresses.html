@@ -31,15 +31,6 @@
                     {% for address in addresses %}
                     <div class="col col-md-4">
                         <div class="card mb-3 mb-lg-0">
-                            <!-- <div class="card-header">
-                                <div class="container">
-                                    <div class="row d-flex justify-content-start"></div>
-                                    <div class="col-auto"><h5>{{forloop.counter}}</h5></div>
-                                    
-                                  
-                                </div>
-                               
-                            </div> -->
                             <div class="card-body">
                                 {% if address.is_default %}
                                 <div class="mb-2"><button class="btn-sm"><span class=" text-end">Default  <i class="bi bi-check-circle-fill"></i></span></button></div>                                      
@@ -48,6 +39,7 @@
                                 <div class="mb-2"><button data-address="{{address.id}}" class="btn-sm default-address">Set As Default</button> </div>
                                 {% endif %}
                                 <address>
+                                    {{address.name}} <br>
                                     {{address.address_line1}}
                                     <br>
                                     {{address.address_line2}}

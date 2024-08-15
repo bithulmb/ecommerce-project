@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'pet_type',
     'product',
     'cart',
+    'orders',
 ]
 
 

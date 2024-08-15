@@ -2,7 +2,8 @@ from django.shortcuts import render,redirect
 from product.models import Product_Variant
 from.models import Cart,CartItem
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.decorators import login_required
+
+
 
 # Create your views here.
 
@@ -97,7 +98,7 @@ def cart_view(request, total=0, quantity=0, cart_items=None):
         
         if total>=500:
             shipping_charge=0
-        grand_total = total + shipping_charge
+        grand_total = total + shipping_charge      
     except ObjectDoesNotExist:
         pass
     context={
@@ -105,14 +106,11 @@ def cart_view(request, total=0, quantity=0, cart_items=None):
         'quantity':quantity,
         'cart_items' :cart_items,
         'shipping_charge':shipping_charge,
-        'grand_total': grand_total,
-    }
+        'grand_total': grand_total,      
+         }
     return render(request,'user_home/cart.html',context)
 
-#view function for checkoout page
-@login_required(login_url='login_page')
-def checkout_view(request):
-    return render(request,'user_home/checkout.html')
+
 
 
 

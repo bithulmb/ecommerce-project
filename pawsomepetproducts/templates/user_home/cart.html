@@ -61,6 +61,9 @@
     </tbody>
     </table>
     </div> <!-- card.// -->
+    <p class="h6 my-5">
+        Shipping Charge Free for Orders Above ₹ 500
+    </p>
     
         </aside> <!-- col.// -->
         <aside class="col-lg-3">
@@ -80,9 +83,7 @@
                   <dd class="text-right text-dark b"><strong> ₹ {{grand_total}}</strong></dd>
                 </dl>
                 <hr>
-                <p class="text-center mb-3">
-                    <img src="./images/misc/payments.png" height="26">
-                </p>
+              
                 <a href="{% url 'checkout_page' %}" class="btn btn-primary btn-block"> Checkout </a>
                 <a href="{% url 'all_products_page' %}" class="btn btn-light btn-block">Continue Shopping</a>
             </div> <!-- card-body.// -->

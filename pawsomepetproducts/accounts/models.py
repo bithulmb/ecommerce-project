@@ -70,6 +70,7 @@ class CustomUser(AbstractBaseUser):
 
 class Address(models.Model):
     user=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    name=models.CharField(max_length=30, null=True)
     address_line1=models.CharField(max_length=50)
     address_line2=models.CharField(max_length=50, blank=True)
     town=models.CharField(max_length=40)

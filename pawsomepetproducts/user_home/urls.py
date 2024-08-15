@@ -3,6 +3,7 @@ from . import views
 from accounts import views as account_views
 from product import views as product_views
 from cart import views as cart_views
+from orders import views as order_views 
 from django.contrib.auth import views as auth_views
 
 
@@ -44,7 +45,7 @@ urlpatterns = [
     #views from product app
     path('products/', product_views.all_products_view, name='all_products_page'),  #userside all products page
     path('products/<int:pk>',product_views.single_product_view, name='single_product_page'),
-    path('products/search',product_views.search_products_view, name='search_products'),
+    path('products/search/',product_views.search_products_view, name='search_products'),
 
 
     #views from cart app
@@ -52,7 +53,13 @@ urlpatterns = [
     path('cart/add/<int:variant_id>', cart_views.add_to_cart_view, name='add_to_cart'),
     path('cart/remove/<int:variant_id>', cart_views.remove_from_cart_view, name='remove_from_cart'),
     path('cart/delete/<int:variant_id>', cart_views.delete_cart_item_view, name='delete_cart_item'),
-    path('checkout/', cart_views.checkout_view, name='checkout_page'),
 
+    #views from order app
+    path('orders/checkout/', order_views.checkout_view, name='checkout_page'),
+    path('orders/place-order/', order_views.place_order_view, name='place_order'),
+    path('orders/add-address', order_views.add_address_order_view, name='add_address_order'),
+    path('orders/payment/', order_views.order_payment_view, name="order_payment"),    
+    path('orders/success/', order_views.order_success_view, name="order_success"),
+    path('user/orders/', order_views.user_orders_view, name="user_orders"),
     
 ]

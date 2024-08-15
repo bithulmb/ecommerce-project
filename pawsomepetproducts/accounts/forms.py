@@ -100,6 +100,16 @@ class AddAddressForm(forms.ModelForm):
     class Meta:
         model=Address
         exclude=['user','is_default']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name'}),
+            'address_line1': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address Line 1'}),
+            'address_line2': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address Line 2'}),
+            'town': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Town'}),
+            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'City'}),
+            'state': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'State'}),
+            'pincode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PIN Code'}),
+            'contact_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contact Number'}),
+        }
 
 class OTPVerificationForm(forms.Form):
     otp=forms.CharField(label="Enter the OTP", max_length=10,min_length=6)
