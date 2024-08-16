@@ -1,0 +1,93 @@
+{% extends 'admin/adminbase.html' %}
+
+{% block content %}
+
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Orders List </h2>
+        </div>
+      
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <form action="{% url 'admin_orders' %}" method="GET">
+                    <input type="text" placeholder="Search Orders" name="q" value="{{request.GET.q}}" class="form-control">
+                    </form>
+                </div>
+                <!-- <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Sort By</option>
+                        <option>Active</option>
+                        <option>Disabled</option>
+                        <option>Show all</option>
+                    </select>
+                </div> -->
+                <!-- <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Show 20</option>
+                        <option>Show 30</option>
+                        <option>Show 40</option>
+                    </select>
+                </div> -->
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Sl No</th>
+                            <th scope="col">Order Number</th>
+                            <th scope="col">User</th>
+                            
+                            <th scope="col">Total Amount</th>
+                            <th scope="col">Payment Method</th>
+                            <th scope="col">Created at</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                         
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{ order.order_number }}</td>
+                            <td>{{order.user}}</td>
+                            
+                            <td>{{order.total_amount}}</td>
+                            <td>{{ order.payment_method }}</td>
+                            <td>{{order.created_at}}</td>
+                             <td>{{order.status}}</td>
+
+                          
+                            <td >
+                                <a href="{% url 'admin_order_details' order.id %}" class="btn btn-md rounded font-sm">View/Edit Order</a>
+                                
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div> <!-- table-responsive //end -->
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+    <!-- <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                <li class="page-item"><a class="page-link" href="#">02</a></li>
+                <li class="page-item"><a class="page-link" href="#">03</a></li>
+                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                <li class="page-item"><a class="page-link" href="#">16</a></li>
+                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+            </ul>
+        </nav>
+    </div> -->
+</section> <!-- content-main end// -->
+
+{% endblock %}

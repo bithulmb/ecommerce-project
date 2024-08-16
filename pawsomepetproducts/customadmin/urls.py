@@ -4,7 +4,7 @@ from accounts import views as account_views
 from category import views as category_views
 from pet_type import views as pet_type_views
 from product import views as product_views
-
+from orders import views as order_views
 
 
 #url patterns in the admin panel
@@ -37,6 +37,9 @@ urlpatterns = [
     path('admin-panel/variants/add/', product_views.admin_add_product_variant_view, name='admin_add_product_variant'),
     path('admin-panel/variants/<int:variant_id>/add-image', product_views.admin_add_product_images_view, name='admin_add_product_images'),
 
+    # order related urls from order app
+    path('admin-panel/orders/', order_views.admin_orders_view, name='admin_orders'),
+    path('admin-panel/orders/<int:order_id>/', order_views.admin_order_details_view, name='admin_order_details'),
 ]
 
 

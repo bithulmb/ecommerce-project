@@ -58,8 +58,10 @@ urlpatterns = [
     path('orders/checkout/', order_views.checkout_view, name='checkout_page'),
     path('orders/place-order/', order_views.place_order_view, name='place_order'),
     path('orders/add-address', order_views.add_address_order_view, name='add_address_order'),
-    path('orders/payment/', order_views.order_payment_view, name="order_payment"),    
+    # path('orders/payment/', order_views.order_payment_view, name="order_payment"),    
     path('orders/success/', order_views.order_success_view, name="order_success"),
     path('user/orders/', order_views.user_orders_view, name="user_orders"),
+    path('user/orders/<str:order_number>/', order_views.user_order_details_view, name="user_order_details"),
+    path('user/orders/<str:order_number>/cancel', order_views.user_cancel_order_view, name="user_cancel_order"),
     
 ]

@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y bg">
+
+    <div class="container">
+        <div class="row">
+        {% include 'user_home/user_dashboard.html' %}
+        <main class="col-md-9">
+            <article class="card">
+            <div class="card-body">
+               
+                <div class="col"><header class=""><h2 class=" text-center ">Order Details</h2></header></div>
+                
+                   
+                 <!-- Alert box for displaying messages -->
+                 {% if messages %}
+                 <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+                 {% for message in messages %}
+                     {{message}}
+                 {% endfor %}                      
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                 </div>
+                 {% endif %}
+                
+                <div class="row mt-3 "> 
+                <div class="col-md-9">
+                    <p>Order Number: <strong>{{ order.order_number }}</strong></p>
+                    <p>Date: <strong>{{ order.created_at|date:"d-m-Y" }}</strong></p>
+                    <p>Total Amount: <strong> ₹ {{ order.total_amount }}</strong></p>
+                    <p>Status: <strong>{{ order.get_status_display }}</strong> </p>
+                    <p>Payment_method: <strong>{{order.payment_method}}</strong></p>
+                 
+                </div>
+                <div class="col-md-3">
+                    <div>
+                       
+                        {% if order.status == 'New' or order.status == 'Approved' or order.status == 'Shipped' %}
+
+                        <a href="{% url 'user_cancel_order' order.order_number %}" class="btn btn-danger">Cancel Order</a>
+                        {% endif %}
+                    </div>
+                   
+                </div>
+            
+                <div class="col mt-3">
+                    <p>Delivery Address :  <strong>
+                        {{ order.address.name}}, 
+                        {{ order.address.address_line1 }}, 
+                        {{ order.address.address_line2 }},
+                        {{ order.address.town }},
+                        {{ order.address.city }},
+                        {{ order.address.state }}
+                         - {{ order.address.pincode }},
+                        Contact - {{ order.address.contact_number }}</strong>
+                    </p>
+                    <h3> Order Items:</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order_items %}
+                        <tr>
+                            <td>
+                                <div class="product-info">
+                                    
+                                    <img src="{{ item.product.thumbnail.url }}" alt="{{ item.product.product_name }}" style="width: 50px; height: 50px;">
+                                    <span>{{ item.product.product_name }}, {{item.product.size}}</span>
+                                </div>
+                                </td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₹ {{ item.product_price }}</td>
+                            <td>₹ {{ item.subtotal }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table> 
+                <div class="text-center">
+                    
+                        <a href="{% url 'user_orders' %}" class="btn btn-secondary">Back To Orders</a>
+                    
+                </div>
+               
+
+                    
+                </div> <!-- row.// -->
+
+           
+            </div> <!-- card-body .// -->
+            </article> <!-- order-group.// --> 
+        </main>
+    </div> <!-- row.// -->
+    </div>
+    
+    
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+    
+
+
+
+
+
+
+{% endblock %}

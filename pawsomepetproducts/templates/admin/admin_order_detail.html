@@ -1,0 +1,129 @@
+{% extends 'admin/adminbase.html' %}
+
+{% block content %}
+
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Order Details </h2>
+        </div>
+      
+    </div>
+    {% if messages %}
+    <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+    {% for message in messages %}
+        {{message}}
+    {% endfor %}                      
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    <div class="card mb-4">
+        
+        <div class="card-body">
+            <div class="row mt-3 "> 
+                <div class="col-md-8"> 
+                    <h3 class="h6">Order Details</h3> 
+                    <p>Order Number: <strong>{{ order.order_number }}</strong></p>
+                    <p><strong>User:</strong> {{ order.user }}</p>
+                    <p>Date: <strong>{{ order.created_at|date:"d-m-Y" }}</strong></p>
+                    <p>Total Amount: <strong> ₹ {{ order.total_amount }}</strong></p>
+                    
+                    <!-- <p>Payment_method: <strong>{{order.payment_method}}</strong></p> -->
+                    <p>Delivery Address :  <strong>
+                        {{ order.address.name}}, 
+                        {{ order.address.address_line1 }}, 
+                        {{ order.address.address_line2 }},
+                        {{ order.address.town }},
+                        {{ order.address.city }},
+                        {{ order.address.state }}
+                         - {{ order.address.pincode }},
+                        Contact - {{ order.address.contact_number }}</strong>
+                    </p>
+                    <p> Order Status: <strong>{{ order.get_status_display }}</strong> </p>
+                    
+                </div>
+                <div class="col-md-4">
+                    <div>
+                        <h3 class="h6">Payment Details</h3>
+                        <p>Payment Id : {{payment_details.payment_id}}</p>
+                        <p>Payment Method : {{payment_details.payment_method}}</p>
+                        <p>Payment Status : {{payment_details.status}}</p>
+                        <p>Payment Creation TIme : {{payment_details.created_at}}</p>
+                       
+                     
+                        
+                    </div>
+                   
+                </div>
+                <div class="row mt-3">
+                      <div class="col-md-3">
+                        <form method="POST" >
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="status"> <h6>Change Order Status:</h6></label>
+                            <select name="status" id="status" class="form-control">
+                                {% for key, value in order.STATUS %}
+                                <option value="{{ key }}" {% if order.status == key %}selected{% endif %}>{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                            <button class=" mt-2 btn btn-primary" type="submit">Update</button>
+    
+                            </div>
+                            
+                           
+                        </form>
+
+                      </div> 
+                    
+                </div>
+            
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h3 class=" h6 mt-3"> Order Items</h3>
+                
+                         <table class="table align-middle mt-3">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order_items %}
+                        <tr>
+                            <td class="">
+                                <div class="product-info">
+                                    
+                                    <span><img src="{{ item.product.thumbnail.url }}" alt="{{ item.product.product_name }}" style="width: 50px; height: 50px;"></span>
+                                    <span>{{ item.product.product_name }}, {{item.product.size}}</span>
+                                </div>
+                                </td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₹ {{ item.product_price }}</td>
+                            <td>₹ {{ item.subtotal }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table> 
+
+                    </div>
+                
+
+
+                </div>
+<!--                
+                <div class="text-center">
+                    
+                        <a href="{% url 'user_orders' %}" class="btn btn-secondary">Back To Orders</a>
+                    
+                </div> -->
+               
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+   
+</section> <!-- content-main end// -->
+
+{% endblock %}

@@ -18,14 +18,12 @@ class Order(models.Model):
 
     STATUS = (
         ('New', 'New'),
-        ('Accepted', 'Accepted'),
-        ('Completed', 'Completed'),
+        ('Approved', 'Approved'),
+        ('Shipped', 'Shipped'),
+        ('Delivered', 'Delivered'),
         ('Cancelled', 'Cancelled'),
-        # ('Delivered', 'Delivered'),
-        # ('Awaiting payment', 'Awaiting payment'),
-        # ('Confirmed', 'Confirmed'),
-        # ('Shipped', 'Shipped'),
-        # ('Returned', 'Returned'),
+        ('Returned', 'Returned'),
+     
     )
     PAYMENT_METHODS=(
         ('Online','Online'),
@@ -57,4 +55,8 @@ class OrderProduct(models.Model):
 
     
     def __str__(self):
-        return str(self.product.product_name)  
+        return str(self.product.product_name) 
+    
+    
+    def subtotal(self):
+        return self.product_price*self.quantity 

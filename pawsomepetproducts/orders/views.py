@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from cart.models import CartItem,Cart
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,8 +8,40 @@ from .models import Order,Payment,OrderProduct
 import datetime
 from django.http import HttpResponse
 from product.models import Product_Variant
+from django.contrib import messages
+from django.db.models import Q
 
 # Create your views here.
+
+#-------------------------------------admin side views------------------
+
+#view for listing the orders in adminpanel
+def admin_orders_view(request):
+    query=request.GET.get('q')
+    if query:   #if there is search query
+        orders=Order.objects.filter(Q(user__first_name__icontains=query) | Q(user__last_name__icontains=query) | Q(user__email__icontains=query) | Q(order_number__icontains=query))
+    else:
+        orders=Order.objects.all().order_by('-created_at')
+    return render(request,'admin/admin_orders.html', {'orders':orders})
+
+
+def admin_order_details_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        order.status = status
+        order.save()
+        messages.success(request, 'Order status updated successfully.')
+        return redirect('admin_order_details', order_id=order_id)
+    order_items = OrderProduct.objects.filter(order=order)
+    payment_details=get_object_or_404(Payment, order=order)
+    
+    context = {
+                'order': order, 
+                'order_items': order_items, 
+                'payment_details' : payment_details,
+               }
+    return render(request, 'admin/admin_order_detail.html', context )
 
 
 # -------------------------------user views-------------------------------
@@ -43,6 +75,7 @@ def checkout_view(request, total=0, quantity=0, cart_items=None):
     return render(request,'user_home/checkout.html', context)
 
 #view function for placing order
+@login_required(login_url='login_page')
 def place_order_view(request):
     
     current_user=request.user
@@ -136,6 +169,7 @@ def place_order_view(request):
     
 
 #view function for adding address in checkout page
+@login_required(login_url='login_page')
 def add_address_order_view(request):
 
     if request.method == 'POST':
@@ -151,6 +185,7 @@ def add_address_order_view(request):
 
 
 #view function for displaying order success page
+@login_required(login_url='login_page')
 def order_success_view(request):
     return render(request,'user_home/order_success.html')
 
@@ -160,5 +195,39 @@ def order_payment_view(request):
 
 
 #view function for displaying orders in user profile
+@login_required(login_url='login_page')
 def user_orders_view(request):
-    return render(request,'user_home/user_orders.html')
+    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+
+    context = {
+        'orders': orders,
+    }
+
+    return render(request,'user_home/user_orders.html',context)
+
+#view function for detailed order view of a order
+@login_required(login_url='login_page')
+def user_order_details_view(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+    order_items = OrderProduct.objects.filter(order=order)
+    payment_details=Payment.objects.filter(order=order)
+    context = {
+        'order': order,
+        'order_items': order_items,
+        'payment_details' : payment_details,
+    }
+    return render(request, 'user_home/user_order_details.html', context)
+
+#view function for cancelling an order
+@login_required(login_url='login_page')
+def user_cancel_order_view(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+    
+    if request.method == 'POST':
+        order.status = 'Cancelled'
+        order.save()
+        messages.success(request, 'Cancellation Of Order Succesful')
+        return redirect('user_orders')
+    return render(request, 'user_home/confirm_cancel_order.html',{'order':order})
+
+

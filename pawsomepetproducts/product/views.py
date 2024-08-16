@@ -16,6 +16,7 @@ from django.template.loader import render_to_string
 
 
 # Create your views here.
+
 #-------------------------admin side views----------------------------------
 
 #view function for listing the products

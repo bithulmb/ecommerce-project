@@ -4,7 +4,7 @@
     <ul class="list-group">
         <a class="list-group-item {% active_link 'user_profile' %}" href="{% url 'user_profile' %}"> Edit Profile</a>
         <a class="list-group-item {% active_link 'change_password' %}" href="{% url 'change_password' %}"> Change Password </a>
-        <a class="list-group-item " href="#"> My Orders </a>
+        <a class="list-group-item {% active_link 'user_orders' %}" href="{% url 'user_orders' %}"> My Orders </a>
         <a class="list-group-item {% active_link 'user_addresses || add_address || set_default_address || edit_address || delete_address' %}" href="{% url 'user_addresses' %}"> My Addresses </a>
         <a class="list-group-item" href="#">Wallets </a>
     </ul>
