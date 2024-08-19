@@ -5,6 +5,7 @@ from product import views as product_views
 from cart import views as cart_views
 from orders import views as order_views 
 from django.contrib.auth import views as auth_views
+from wishlist import views as wishlist_views
 
 
 
@@ -63,5 +64,11 @@ urlpatterns = [
     path('user/orders/', order_views.user_orders_view, name="user_orders"),
     path('user/orders/<str:order_number>/', order_views.user_order_details_view, name="user_order_details"),
     path('user/orders/<str:order_number>/cancel', order_views.user_cancel_order_view, name="user_cancel_order"),
+
+    #views from wishlist app
+    path('wishlist/', wishlist_views.wishlist_view, name='wishlist_page'),
+    path('wishlist/add/<int:variant_id>', wishlist_views.add_to_wishlist_view, name='add_to_wishlist'),
+    path('wishlist/remove/<int:variant_id>', wishlist_views.remove_from_wishlist_view, name='remove_from_wishlist'),
+    
     
 ]

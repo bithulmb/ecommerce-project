@@ -4,11 +4,29 @@
 
 
 <section class="section-content padding-y bg">
+  
     <div class="container">
     
     <!-- ============================ COMPONENT 1 ================================= -->
+     <!-- Alert box for displaying messages -->
+     {% if messages %}
+     <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+     {% for message in messages %}
+         {{message}}
+     {% endfor %}                      
+     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+     </div>
+     {% endif %}
+    
+    
     {% if cart_items %}
-    <div class="row">
+    <div class="container">
+      
+        <h1 class="title-page text-center">My Cart</h1>
+       
+        
+    </div> <!-- container //  -->
+    <div class="row mt-3">
         <aside class="col-lg-9">
     <div class="card">
     <table class="table table-borderless table-shopping-cart">

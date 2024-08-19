@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from product.models import Product_Variant
 from.models import Cart,CartItem
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.contrib import messages
 
 
 # Create your views here.
@@ -22,8 +22,16 @@ def add_to_cart_view(request, variant_id):
         # If the user is authenticated, check for a CartItem associated with the user
         try:
             cart_item = CartItem.objects.get(variant=variant, user=request.user)
-            cart_item.quantity += 1
-            cart_item.save()
+            if cart_item.quantity<variant.stock:          
+                if cart_item.quantity<3:
+                    cart_item.quantity += 1
+                    cart_item.save()
+                else:
+                    messages.error(request,"Maximum 3 quantity per product is allowed for a user")
+                    return redirect('cart_page')
+            else:
+                messages.error(request,"No more stocks available")
+                return redirect('cart_page')
         except CartItem.DoesNotExist:
             cart_item = CartItem.objects.create(variant=variant, quantity=1, user=request.user)
             cart_item.save()
@@ -37,8 +45,13 @@ def add_to_cart_view(request, variant_id):
 
         try:
             cart_item=CartItem.objects.get(variant=variant, cart=cart)
-            cart_item.quantity += 1
-            cart_item.save()
+            if cart_item.quantity<3:
+                cart_item.quantity += 1
+                cart_item.save()
+            else:
+                messages.error(request,"Maximum 3 quantity per product is allowed for a user")
+                return redirect('cart_page')
+
         except CartItem.DoesNotExist:
             cart_item=CartItem.objects.create(variant=variant, quantity=1, cart=cart,)
             cart_item.save()
@@ -87,10 +100,10 @@ def cart_view(request, total=0, quantity=0, cart_items=None):
     try:
           #if user is authenticated cart items are filetered based on user id else based on last cartid
         if request.user.is_authenticated:
-             cart_items=CartItem.objects.filter(user=request.user, is_active=True)
+             cart_items=CartItem.objects.filter(user=request.user, is_active=True).order_by('id')
         else:
             cart=Cart.objects.get(cart_id=_cart_id(request))
-            cart_items=CartItem.objects.filter(cart=cart, is_active=True)
+            cart_items=CartItem.objects.filter(cart=cart, is_active=True).order_by('id')
         
         for cart_item in cart_items:
             total += (cart_item.variant.price * cart_item.quantity)

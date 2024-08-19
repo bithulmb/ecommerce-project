@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from .models import Product_Variant
+from .models import Product_Variant,Product_Images
 from .models import Product
 from pet_type.models import PetType
 from category.models import Category
@@ -13,10 +13,11 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.core.files.base import ContentFile
+import base64
 
 
 # Create your views here.
-
 #-------------------------admin side views----------------------------------
 
 #view function for listing the products
@@ -97,22 +98,47 @@ def admin_add_product_variant_view(request):
         form=AddProductVariantForm()
     return render(request, 'admin/admin_add_product_variant.html', {'form':form})
 
-#view for adding images for product variants
-@staff_member_required(login_url="admin_login")
-def admin_add_product_images_view(request, variant_id):
+#view for adding images and editing images for product variants
+@staff_member_required(login_url="admin_login")   
+def admin_add_edit_product_images_view(request, variant_id):
     variant = get_object_or_404(Product_Variant, id=variant_id)
     
     if request.method == 'POST':
-        form = AddProductImages(request.POST, request.FILES)
-        if form.is_valid():
-            image = form.save(commit=False)
-            image.product_variant = variant
-            image.save()
-            return redirect('admin_product_variants')  # Redirect to the variants page
+        if 'delete_image' in request.POST:
+            image_id = request.POST.get('image_id')
+            Product_Images.objects.filter(id=image_id).delete()
+            messages.success(request, 'Image deleted successfully.')
+            return redirect('admin_add_edit_product_images', variant_id=variant_id)
+        else:
+            images = request.FILES.get('images')
+           
+            Product_Images.objects.create(product_variant=variant, images=images)
+            messages.success(request, 'Image added successfully.')
+            return redirect('admin_add_edit_product_images', variant_id=variant_id)
     else:
-        form = AddProductImages()
+        pass
     
-    return render(request, 'admin/add_product_images.html', {'form': form, 'variant': variant})
+    images = variant.images.all()
+    
+    return render(request, 'admin/add_edit_product_images.html', {
+        
+        'variant': variant,
+        'images': images
+    })
+# def admin_add_product_images_view(request, variant_id):
+#     variant = get_object_or_404(Product_Variant, id=variant_id)
+    
+#     if request.method == 'POST':
+#         form = AddProductImages(request.POST, request.FILES)
+#         if form.is_valid():
+#             image = form.save(commit=False)
+#             image.product_variant = variant
+#             image.save()
+#             return redirect('admin_product_variants')  
+#     else:
+#         form = AddProductImages()
+    
+#     return render(request, 'admin/add_product_images.html', {'form': form, 'variant': variant})
 
 #-------------------------user side views----------------------------------
 

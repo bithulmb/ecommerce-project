@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'product',
     'cart',
     'orders',
+    'wishlist',
 ]
 
 
@@ -90,6 +91,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'cart.context_processors.counter', #added to get the number of items in the cart in all pages except admin
+                'wishlist.context_processors.wishlist_counter' #added to get the mumber of items in wishlist of a authenticated user
                
             ],
         },

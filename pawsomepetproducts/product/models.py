@@ -39,7 +39,7 @@ class Product_Variant(models.Model):
 
 
 class Product_Images(models.Model):
-    product_variant    = models.ForeignKey(Product_Variant, on_delete=models.CASCADE, null=True)
+    product_variant    = models.ForeignKey(Product_Variant, on_delete=models.CASCADE, related_name='images', null=True)
     images             = models.ImageField(upload_to="photos/product_images")
     is_active          = models.BooleanField(default=True)
 

@@ -16,4 +16,4 @@ class AddProductVariantForm(ModelForm):
 class AddProductImages(ModelForm):
     class Meta:
         model   =Product_Images
-        fields = ['images', 'is_active']
+        fields = ['images',]

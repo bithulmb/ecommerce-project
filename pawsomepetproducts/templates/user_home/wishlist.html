@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<section class="section-content padding-y bg">
+   
+    <div class="container">
+    
+    <!-- ============================ COMPONENT 1 ================================= -->
+     <!-- Alert box for displaying messages -->
+     {% if messages %}
+     <div class="alert alert-info alert-dismissible fade show text-center" role="alert">
+     {% for message in messages %}
+         {{message}}
+     {% endfor %}                      
+     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+     </div>
+     {% endif %}
+    
+    
+    {% if wishlist_items %}
+    <div class="container">
+      
+        <h1 class="title-page text-center">My Wishlist</h1>
+       
+        
+    </div> <!-- container //  -->
+    <div class="row mt-3">
+        <aside class="col-lg-9 m-auto">
+    <div class="card">
+    <table class="table table-borderless table-shopping-cart">
+    <thead class="text-muted">
+    <tr class="small text-uppercase">
+      <th scope="col">Product</th>
+      <th scope="col" width="120">Price</th>
+      <th scope="col" class="text-right"> </th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in wishlist_items %}
+    <tr>
+        <td>
+            <figure class="itemside align-items-center">
+                <div class="aside"><img src="{{item.product_variant.thumbnail.url}}" class="img-sm"></div>
+                <figcaption class="info">
+                    <a href="{% url 'single_product_page' item.product_variant.id %}" class="title text-dark">{{item.product_variant.product_name}}</a>
+                    <p class="text-muted small">Size: {{item.product_variant.size}}</p>
+                </figcaption>
+            </figure>
+        </td>
+
+        <td> 
+            <div class="price-wrap"> 
+                <var class="price">₹ {{item.product_variant.price}}</var> 
+                
+            </div> <!-- price-wrap .// -->
+        </td>
+        <td class="text-right"> 
+            <div class="btn-group">
+                <!-- <a href="{% url 'add_to_cart' item.product_variant.id %}" class="btn btn-primary"> Add to Cart</a> -->
+                <a href="{% url 'remove_from_wishlist' item.product_variant.id %}" class="btn btn-danger ms-3"> Remove</a>
+            </div>
+            
+           
+        </td>
+    </tr>
+    <tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    <div class="text-center my-5"><a href="{% url 'all_products_page' %}" class="btn btn-primary">Add More Products</a></div>
+    </div> <!-- card.// -->
+   
+    
+        </aside> <!-- col.// -->
+       
+    
+    </div> <!-- row.// -->
+    {% else %}
+    <h2 class="text-center"> Your Wishlist is Empty</h2>
+    <div class="text-center my-5"><a href="{% url 'all_products_page' %}" class="btn btn-primary">Add Products to Wishlist</a></div>
+    {% endif %} 
+    <!-- ============================ COMPONENT 1 END .// ================================= -->
+    
+    </div> <!-- container .//  -->
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+
+
+{% endblock %}

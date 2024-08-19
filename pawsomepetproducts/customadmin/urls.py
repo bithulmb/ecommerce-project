@@ -35,7 +35,7 @@ urlpatterns = [
     path('admin-panel/variants/', product_views.admin_product_variants_view, name = 'admin_product_variants'),
     path('admin-panel/variants/edit/<int:pk>', product_views.admin_edit_product_variant_view, name='admin_edit_product_variant'),
     path('admin-panel/variants/add/', product_views.admin_add_product_variant_view, name='admin_add_product_variant'),
-    path('admin-panel/variants/<int:variant_id>/add-image', product_views.admin_add_product_images_view, name='admin_add_product_images'),
+    path('admin-panel/variants/<int:variant_id>/image', product_views.admin_add_edit_product_images_view, name='admin_add_edit_product_images'),
 
     # order related urls from order app
     path('admin-panel/orders/', order_views.admin_orders_view, name='admin_orders'),
