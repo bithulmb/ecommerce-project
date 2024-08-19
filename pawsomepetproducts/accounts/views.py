@@ -26,8 +26,9 @@ import requests
 #-------------------------Admin side views----------------------------------
 
 #view function for listing the users in admin panel
-@never_cache
+
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_users_view(request):
     query=request.GET.get('q')
     if query:   #if there is search query
@@ -36,8 +37,9 @@ def admin_users_view(request):
         users=CustomUser.objects.filter(is_superadmin = False)
     return render(request, 'admin/admin_users.html', {'users':users})
 
-@never_cache
+
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_edit_user_view(request, pk):
     object=CustomUser.objects.get(id=pk)
     if request.method == 'POST':
@@ -141,6 +143,7 @@ def signup_view(request):
         return render(request,'user_home/signup.html', {'form':form})
 
 #view function for verifying the otp and saving the details of user to database
+@never_cache
 def verify_otp_view(request):
     if request.method == 'POST':
         form = OTPVerificationForm(request.POST)
@@ -189,6 +192,7 @@ def verify_otp_view(request):
 
 
 #view function for sending the otp again 
+@never_cache
 def resend_otp_view(request):
     user_data = request.session.get('user_data')
     if user_data: #verify whether the session data is available
@@ -216,6 +220,7 @@ def logout_view(request):
         
 #view for displaying user profile
 @login_required(login_url='login_page')
+@never_cache
 def user_profile_view(request):
     object=CustomUser.objects.get(id=request.user.id)
     if request.method == 'POST':
@@ -231,6 +236,7 @@ def user_profile_view(request):
 
 #view for changing password of the user in profile section
 @login_required(login_url='login_page')
+@never_cache
 def user_change_password_view(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
@@ -245,6 +251,7 @@ def user_change_password_view(request):
 
 #view for adding new adress for user
 @login_required(login_url='login_page')
+@never_cache
 def user_add_address_view(request):
     if request.method == 'POST':
         form = AddAddressForm(request.POST)
@@ -261,6 +268,7 @@ def user_add_address_view(request):
 
 #view function for listing addresses of user
 @login_required(login_url='login_page')
+@never_cache
 def user_addresses_view(request):
     addresses=Address.objects.filter(user=request.user)
     return render(request,'user_home/user_addresses.html',{'addresses':addresses})
@@ -287,6 +295,7 @@ def user_set_default_address_view(request):
 
 #view function for editing address of user
 @login_required(login_url='login_page')
+@never_cache
 def user_edit_address_view(request,pk):
     object=get_object_or_404(Address,id=pk)
     if request.method == 'POST':
@@ -302,6 +311,8 @@ def user_edit_address_view(request,pk):
 
 
 #view function for deleting address of user
+@login_required(login_url='login_page')
+@never_cache
 def user_delete_address_view(request,pk):
     object=get_object_or_404(Address,id=pk)
     if request.method == 'POST':

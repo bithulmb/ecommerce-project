@@ -72,6 +72,7 @@ class UserProfileForm(forms.ModelForm):
             'email': forms.TextInput(attrs={'readonly': 'readonly'}),
             
         }
+        
     #phonenumber validator function    
     def clean_phone_number(self):
         phonenumber = self.cleaned_data.get('phone_number')
@@ -110,6 +111,18 @@ class AddAddressForm(forms.ModelForm):
             'pincode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'PIN Code'}),
             'contact_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contact Number'}),
         }
+
+    def clean_pincode(self):
+        pincode = self.cleaned_data.get('pincode')
+        if not re.match(r'^\d{6}$', pincode):
+            raise forms.ValidationError("PIN Code must be exactly 6 digits.")
+        return pincode
+
+    def clean_contact_number(self):
+        contact_number = self.cleaned_data.get('contact_number')
+        if not re.match(r'^\d{10}$', contact_number):
+            raise forms.ValidationError("Contact number must be exactly 10 digits.")
+        return contact_number
 
 class OTPVerificationForm(forms.Form):
     otp=forms.CharField(label="Enter the OTP", max_length=10,min_length=6)

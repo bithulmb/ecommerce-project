@@ -3,7 +3,7 @@ from .models import Category
 from .forms import AddCategoryForm
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-
+from django.views.decorators.cache import never_cache
 
 
 # Create your views here.
@@ -11,6 +11,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 #view function for listing categories and searching in category manangement page
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_category_view(request):
     query=request.GET.get('q')
     if query:
@@ -21,6 +22,7 @@ def admin_category_view(request):
 
 #view function for adding new category
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_add_category_view(request):
     if request.method == 'POST':        
         form=AddCategoryForm(request.POST)
@@ -34,6 +36,7 @@ def admin_add_category_view(request):
 
 #view function for editing category
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_edit_category_view(request,pk):
     object=Category.objects.get(id=pk)
     if request.method == 'POST':

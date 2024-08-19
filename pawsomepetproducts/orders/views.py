@@ -10,12 +10,15 @@ from django.http import HttpResponse
 from product.models import Product_Variant
 from django.contrib import messages
 from django.db.models import Q
-
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.cache import never_cache
 # Create your views here.
 
 #-------------------------------------admin side views------------------
 
 #view for listing the orders in adminpanel
+@staff_member_required(login_url="admin_login")
+@never_cache
 def admin_orders_view(request):
     query=request.GET.get('q')
     if query:   #if there is search query
@@ -25,6 +28,8 @@ def admin_orders_view(request):
     return render(request,'admin/admin_orders.html', {'orders':orders})
 
 
+@staff_member_required(login_url="admin_login")
+@never_cache
 def admin_order_details_view(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     if request.method == 'POST':
@@ -47,6 +52,7 @@ def admin_order_details_view(request, order_id):
 # -------------------------------user views-------------------------------
 #view function for checkoout page
 @login_required(login_url='login_page')
+@never_cache
 def checkout_view(request, total=0, quantity=0, cart_items=None):
     shipping_charge=100
     grand_total=0
@@ -76,6 +82,7 @@ def checkout_view(request, total=0, quantity=0, cart_items=None):
 
 #view function for placing order
 @login_required(login_url='login_page')
+@never_cache
 def place_order_view(request):
     
     current_user=request.user
@@ -170,6 +177,7 @@ def place_order_view(request):
 
 #view function for adding address in checkout page
 @login_required(login_url='login_page')
+@never_cache
 def add_address_order_view(request):
 
     if request.method == 'POST':
@@ -186,6 +194,7 @@ def add_address_order_view(request):
 
 #view function for displaying order success page
 @login_required(login_url='login_page')
+@never_cache
 def order_success_view(request):
     return render(request,'user_home/order_success.html')
 
@@ -196,6 +205,7 @@ def order_payment_view(request):
 
 #view function for displaying orders in user profile
 @login_required(login_url='login_page')
+@never_cache
 def user_orders_view(request):
     orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
 
@@ -207,6 +217,7 @@ def user_orders_view(request):
 
 #view function for detailed order view of a order
 @login_required(login_url='login_page')
+@never_cache
 def user_order_details_view(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user)
     order_items = OrderProduct.objects.filter(order=order)
@@ -220,6 +231,7 @@ def user_order_details_view(request, order_number):
 
 #view function for cancelling an order
 @login_required(login_url='login_page')
+@never_cache
 def user_cancel_order_view(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user)
     

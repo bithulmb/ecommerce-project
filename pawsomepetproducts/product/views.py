@@ -21,8 +21,8 @@ import base64
 #-------------------------admin side views----------------------------------
 
 #view function for listing the products
-@never_cache
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_products_view(request):
     query=request.GET.get('q')
     if query:
@@ -32,8 +32,8 @@ def admin_products_view(request):
     return render(request, 'admin/admin_products.html', {'products': products})
 
 #view fucntion for editing the product 
-@never_cache
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_edit_product_view(request,pk):
     object=Product.objects.get(id=pk)
     if request.method == 'POST':
@@ -46,8 +46,8 @@ def admin_edit_product_view(request,pk):
     return render(request, 'admin/admin_edit_product.html', {'form':form})
 
 #view function for adding new product
-@never_cache
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_add_product_view(request):
     if request.method == 'POST':        
         form=AddProductForm(request.POST)
@@ -60,8 +60,8 @@ def admin_add_product_view(request):
 
 
 #view fucntion for listing product variants
-@never_cache
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_product_variants_view(request):
     query=request.GET.get('q')
     if query:
@@ -71,8 +71,8 @@ def admin_product_variants_view(request):
     return render(request, 'admin/admin_product_variants.html', {'product_variants': product_variants})
 
 #view fucntion for editing the product variant 
-@never_cache
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_edit_product_variant_view(request,pk):
     object=Product_Variant.objects.get(id=pk)
     if request.method == 'POST':
@@ -86,8 +86,8 @@ def admin_edit_product_variant_view(request,pk):
 
 
 #view function for adding new product variant
-@never_cache
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_add_product_variant_view(request):
     if request.method == 'POST':        
         form=AddProductVariantForm(request.POST, request.FILES)
@@ -99,7 +99,8 @@ def admin_add_product_variant_view(request):
     return render(request, 'admin/admin_add_product_variant.html', {'form':form})
 
 #view for adding images and editing images for product variants
-@staff_member_required(login_url="admin_login")   
+@staff_member_required(login_url="admin_login") 
+@never_cache  
 def admin_add_edit_product_images_view(request, variant_id):
     variant = get_object_or_404(Product_Variant, id=variant_id)
     
@@ -125,24 +126,12 @@ def admin_add_edit_product_images_view(request, variant_id):
         'variant': variant,
         'images': images
     })
-# def admin_add_product_images_view(request, variant_id):
-#     variant = get_object_or_404(Product_Variant, id=variant_id)
-    
-#     if request.method == 'POST':
-#         form = AddProductImages(request.POST, request.FILES)
-#         if form.is_valid():
-#             image = form.save(commit=False)
-#             image.product_variant = variant
-#             image.save()
-#             return redirect('admin_product_variants')  
-#     else:
-#         form = AddProductImages()
-    
-#     return render(request, 'admin/add_product_images.html', {'form': form, 'variant': variant})
+
 
 #-------------------------user side views----------------------------------
 
 #view function for all products page
+@never_cache
 def all_products_view(request):
     pet_type_ids = request.GET.getlist('pet_type')
     category_ids = request.GET.getlist('category')
@@ -188,6 +177,7 @@ def all_products_view(request):
 
 
 #view function for viewing single product
+@never_cache
 def single_product_view(request, pk):
     product_variant = Product_Variant.objects.get(id=pk)
     all_variants = Product_Variant.objects.filter(product_name = product_variant.product_name)
@@ -201,6 +191,7 @@ def single_product_view(request, pk):
 
 
 # view function for searching products through search bar
+@never_cache
 def search_products_view(request):
     keyword = request.GET.get('keyword', '')
     pet_type_filter = request.GET.getlist('pet_type')

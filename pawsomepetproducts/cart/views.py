@@ -3,6 +3,7 @@ from product.models import Product_Variant
 from.models import Cart,CartItem
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
+from django.views.decorators.cache import never_cache
 
 
 # Create your views here.
@@ -15,6 +16,7 @@ def _cart_id(request):
     return cart
 
 #view function to add products to cart
+
 def add_to_cart_view(request, variant_id):
     variant=Product_Variant.objects.get(id=variant_id)
 

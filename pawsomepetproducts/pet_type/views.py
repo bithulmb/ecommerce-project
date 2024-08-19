@@ -3,11 +3,13 @@ from .models import PetType
 from .forms import AddPetTypeForm
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.cache import never_cache
 
 # Create your views here.
 
 #view function for the listing of the pet types and searching pet types
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_pet_type_view(request):
     query=request.GET.get('q')
     if query:
@@ -19,6 +21,7 @@ def admin_pet_type_view(request):
 
 #view function for adding pet type
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_add_pet_type_view(request):
     if request.method == 'POST':        
         form=AddPetTypeForm(request.POST)
@@ -32,6 +35,7 @@ def admin_add_pet_type_view(request):
 
 #view function for editing the pet types.
 @staff_member_required(login_url="admin_login")
+@never_cache
 def admin_edit_pet_type_view(request,pk):
     object=PetType.objects.get(id=pk)
     if request.method == 'POST':
