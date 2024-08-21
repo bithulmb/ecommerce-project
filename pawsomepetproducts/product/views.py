@@ -15,6 +15,7 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
 import base64
+from wishlist.models import Wishlist
 
 
 # Create your views here.
@@ -182,10 +183,15 @@ def single_product_view(request, pk):
     product_variant = Product_Variant.objects.get(id=pk)
     all_variants = Product_Variant.objects.filter(product_name = product_variant.product_name)
     in_cart=CartItem.objects.filter(cart__cart_id=_cart_id(request),variant=product_variant).exists() #checking if the item is already added to the cart   
+    in_wishlist=False
+    if request.user.is_authenticated:
+        in_wishlist=Wishlist.objects.filter(user=request.user, product_variant=product_variant).exists()
+
     context = {
         'product_variant': product_variant,
         'all_variants': all_variants,
-        'in_cart'   : in_cart
+        'in_cart'   : in_cart,
+        'in_wishlist':in_wishlist,
     }
     return render(request, 'user_home/single_product.html', context)
 

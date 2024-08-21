@@ -12,6 +12,14 @@ from django.contrib import messages
 from django.db.models import Q
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
+import razorpay
+from django.conf import settings
+from django.http import HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
+
+client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
+
+
 # Create your views here.
 
 #-------------------------------------admin side views------------------
@@ -24,7 +32,7 @@ def admin_orders_view(request):
     if query:   #if there is search query
         orders=Order.objects.filter(Q(user__first_name__icontains=query) | Q(user__last_name__icontains=query) | Q(user__email__icontains=query) | Q(order_number__icontains=query))
     else:
-        orders=Order.objects.all().order_by('-created_at')
+        orders=Order.objects.filter(is_ordered=True).order_by('-created_at')
     return render(request,'admin/admin_orders.html', {'orders':orders})
 
 
@@ -114,12 +122,13 @@ def place_order_view(request):
         #if the user has selected cash on delivery option in payment method
         if payment_method=="cash_on_delivery":
             address = Address.objects.get(id=address_id)
+            
+            #creating an order instance and saving
             order_instance = Order()
             order_instance.user=current_user
             order_instance.address=address
             order_instance.total_amount=grand_total
-            order_instance.payment_method="Cash On Delivery"
-            
+            order_instance.payment_method="Cash On Delivery" 
             order_instance.save()
             
             # Generate order number
@@ -169,11 +178,128 @@ def place_order_view(request):
             return redirect('order_success')
         
         if payment_method=="online":
-            pass
+            # authorize razorpay client with API Keys.
+            client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
+            amount = int(grand_total * 100)  # Convert to paisa          
+            
+            #creating an order instance and saving
+            order_instance = Order()
+            order_instance.user = current_user
+            order_instance.address = Address.objects.get(id=address_id)
+            order_instance.total_amount = grand_total
+            order_instance.payment_method = "Online"
+            order_instance.save()
+
+            # Generate order number
+            yr = int(datetime.date.today().strftime("%Y"))
+            dt = int(datetime.date.today().strftime("%d"))
+            mt = int(datetime.date.today().strftime("%m"))
+            d = datetime.date(yr, mt, dt)
+            current_date = d.strftime("%y%m%d")
+            order_number = current_date + str(order_instance.id)
+            order_instance.order_number = order_number
+            order_instance.save()
+            
+            data = { 
+                "amount": amount, 
+                "currency": "INR", 
+                "receipt": order_number,
+                "payment_capture": "1",
+                 }
+            
+            
+            #create a razor pay order
+            razorpay_order=client.order.create(data = data)
+            
+            order_id=razorpay_order['id']
+            order_status=razorpay_order['status']
+            context={}
+
+
+            if order_status == 'created':
+
+                context={
+                    'order_id':order_id,
+                    'amount': amount,
+                    'user': current_user
+
+                    
+                }
+            # Store the Razorpay order ID  and orderin session
+            request.session['razorpay_order_id'] = razorpay_order['id']
+            request.session['order_id'] = order_instance.id
+
+            return render(request, 'user_home/payment.html', context=context)
+
+#view function for confirming the status of payment
+@csrf_exempt
+def payment_status (request) :
+    if request.method == "POST":
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+
+        params_dict = {
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        }
+
+        try:
+            client.utility.verify_payment_signature(params_dict)
+            
+            # payment successful, save payment details
+            order_id = request.session.get('order_id')
+            order_instance = Order.objects.get(id=order_id)
+            #creating an isntance of payment and saving
+            payment_instance = Payment(
+                user=request.user,
+                payment_id=razorpay_payment_id,
+                payment_method="Online",
+                amount_paid=order_instance.total_amount,
+                status="Completed",
+            )
+            payment_instance.save()
+            
+            #saving payment instance to order instance
+            order_instance.payment = payment_instance
+            order_instance.is_ordered = True
+            order_instance.save()
+
+            # Clear session
+            del request.session['razorpay_order_id']
+            del request.session['order_id']
+
+            #getting the items in cart
+            cart_items = CartItem.objects.filter(user=request.user)
+            
+            #move the cart items to order product table    
+            for item in cart_items:
+                order_product_instance=OrderProduct()
+                order_product_instance.order=order_instance
+                order_product_instance.payment=payment_instance
+                order_product_instance.product=item.variant
+                order_product_instance.quantity=item.quantity
+                order_product_instance.product_price=item.variant.price
+                order_product_instance.save() 
+
+            #reduce the number of stock of product
+                product=Product_Variant.objects.get(id=item.variant.id)
+                product.stock -= item.quantity
+                product.save()
+
+            #clearing the cart of the user
+            cart_items.delete()
 
 
 
-    
+            return redirect('order_success')
+           
+        except razorpay.errors.SignatureVerificationError:
+            return HttpResponseBadRequest()
+    return HttpResponseBadRequest()
+
+
 
 #view function for adding address in checkout page
 @login_required(login_url='login_page')
@@ -196,11 +322,16 @@ def add_address_order_view(request):
 @login_required(login_url='login_page')
 @never_cache
 def order_success_view(request):
-    return render(request,'user_home/order_success.html')
+    order = Order.objects.filter(user=request.user).last()
+    return render(request,'user_home/order_success.html',{'order':order})
+
+@login_required(login_url='login_page')
+@never_cache
+def view_invoice(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'user_home/invoice.html', {'order': order})
 
 
-def order_payment_view(request):
-    return render(request,'user_home/payment.html')
 
 
 #view function for displaying orders in user profile

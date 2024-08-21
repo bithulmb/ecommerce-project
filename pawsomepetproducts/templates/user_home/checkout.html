@@ -92,7 +92,7 @@ $('#new-address-form').submit(function(event){
                                     <div class="col-md-4">
                                         <div class="card mb-3" style="height: 180px;">
                                             <div class="card-body" style="height: 100%;">
-                                                <input type="radio" id="address{{address.id}}" name="address_id" value="{{address.id}}" required>
+                                                <input type="radio" id="address{{address.id}}" name="address_id" value="{{address.id}}" required {% if address.is_default %} checked {% endif %}>
                                                 <label for="address{{address.id}}">
                                                     <div>
                                                         <address>

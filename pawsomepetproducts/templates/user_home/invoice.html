@@ -1,0 +1,46 @@
+<!-- templates/invoice.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice</title>
+    <style>
+        /* Add some basic styling for the invoice */
+        body { font-family: Arial, sans-serif; }
+        .invoice-box { width: 100%; }
+        .invoice-box table { width: 100%; line-height: 1.6; text-align: left; }
+        .invoice-box table td { padding: 8px; vertical-align: top; }
+    </style>
+</head>
+<body>
+    <div class="invoice-box">
+        <h1>Invoice</h1>
+        <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+        <p><strong>Date:</strong> {{ order.created_at|date:"Y-m-d" }}</p>
+
+        <h2>Items:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td>{{ item.product.product_name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product_price }}</td>
+                    <td>{{ item.subtotal }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <p><strong>Total Amount:</strong> {{ order.total_amount }}</p>
+    </div>
+</body>
+</html>

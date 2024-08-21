@@ -17,8 +17,7 @@ class Payment(models.Model):
 class Order(models.Model): 
 
     STATUS = (
-        ('New', 'New'),
-        ('Approved', 'Approved'),
+        ('Processing', 'Processing'),
         ('Shipped', 'Shipped'),
         ('Delivered', 'Delivered'),
         ('Cancelled', 'Cancelled'),
@@ -35,7 +34,7 @@ class Order(models.Model):
     address         = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
     order_number    = models.CharField(max_length=20)
     total_amount    = models.DecimalField(max_digits=8, decimal_places=2)
-    status          = models.CharField(max_length=20, choices=STATUS, default='New')
+    status          = models.CharField(max_length=20, choices=STATUS, default='Processing')
     is_ordered      = models.BooleanField(default=False)
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)

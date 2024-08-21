@@ -47,11 +47,15 @@ def add_to_cart_view(request, variant_id):
 
         try:
             cart_item=CartItem.objects.get(variant=variant, cart=cart)
-            if cart_item.quantity<3:
-                cart_item.quantity += 1
-                cart_item.save()
+            if cart_item.quantity<variant.stock:          
+                if cart_item.quantity<3:
+                    cart_item.quantity += 1
+                    cart_item.save()
+                else:
+                    messages.error(request,"Maximum 3 quantity per product is allowed for a user")
+                    return redirect('cart_page')
             else:
-                messages.error(request,"Maximum 3 quantity per product is allowed for a user")
+                messages.error(request,"No more stocks available")
                 return redirect('cart_page')
 
         except CartItem.DoesNotExist:
