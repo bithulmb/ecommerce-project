@@ -66,18 +66,35 @@
             </div> <!-- table-responsive //end -->
         </div> <!-- card-body end// -->
     </div> <!-- card end// -->
-    <!-- <div class="pagination-area mt-15 mb-50">
+    <div class="pagination-area mt-15 mb-50">
         <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-start">
-                <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                <li class="page-item"><a class="page-link" href="#">02</a></li>
-                <li class="page-item"><a class="page-link" href="#">03</a></li>
-                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                <li class="page-item"><a class="page-link" href="#">16</a></li>
-                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+                {% if pet_types.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pet_types.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                            <i class="material-icons md-chevron_left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+    
+                {% for i in pet_types.paginator.page_range %}
+                    {% if pet_types.number == i %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ i }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+    
+                {% if pet_types.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pet_types.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                            <i class="material-icons md-chevron_right"></i>
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
         </nav>
-    </div> -->
+    </div>
 </section> 
 <!-- content-main end// -->
 

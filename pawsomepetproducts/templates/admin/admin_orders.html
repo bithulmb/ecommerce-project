@@ -77,6 +77,36 @@
             </div> <!-- table-responsive //end -->
         </div> <!-- card-body end// -->
     </div> <!-- card end// -->
+
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                {% if orders.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                            <i class="material-icons md-chevron_left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+    
+                {% for i in orders.paginator.page_range %}
+                    {% if orders.number == i %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ i }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+    
+                {% if orders.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                            <i class="material-icons md-chevron_right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
     <!-- <div class="pagination-area mt-15 mb-50">
         <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-start">

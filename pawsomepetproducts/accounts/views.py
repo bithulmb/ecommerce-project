@@ -19,6 +19,7 @@ from cart.models import Cart,CartItem
 from cart.views import _cart_id
 import requests
 from .decorators import superuser_required
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 
 # Create your views here.
@@ -37,6 +38,17 @@ def admin_users_view(request):
         users=CustomUser.objects.filter(is_superadmin = False).filter(Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query))
     else:
         users=CustomUser.objects.filter(is_superadmin = False)
+
+    #for including paginator
+    paginator = Paginator(users, 8) 
+    page = request.GET.get('page')
+
+    try:
+        users = paginator.page(page)
+    except PageNotAnInteger:
+        users = paginator.page(1)
+    except EmptyPage:
+        users = paginator.page(paginator.num_pages)
     return render(request, 'admin/admin_users.html', {'users':users})
 
 

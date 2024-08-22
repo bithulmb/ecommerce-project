@@ -77,18 +77,36 @@
             </div> <!-- table-responsive //end -->
         </div> <!-- card-body end// -->
     </div> <!-- card end// -->
-    <!-- <div class="pagination-area mt-15 mb-50">
+
+    <div class="pagination-area mt-15 mb-50">
         <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-start">
-                <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                <li class="page-item"><a class="page-link" href="#">02</a></li>
-                <li class="page-item"><a class="page-link" href="#">03</a></li>
-                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                <li class="page-item"><a class="page-link" href="#">16</a></li>
-                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+                {% if users.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                            <i class="material-icons md-chevron_left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+    
+                {% for i in users.paginator.page_range %}
+                    {% if users.number == i %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ i }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+    
+                {% if users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                            <i class="material-icons md-chevron_right"></i>
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
         </nav>
-    </div> -->
+    </div>
 </section> <!-- content-main end// -->
 
 {% endblock %}

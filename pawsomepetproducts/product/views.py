@@ -19,6 +19,7 @@ from wishlist.models import Wishlist
 from accounts.decorators import superuser_required
 
 
+
 # Create your views here.
 #-------------------------admin side views----------------------------------
 
@@ -31,6 +32,18 @@ def admin_products_view(request):
         products=Product.objects.filter(name__icontains=query)
     else:
         products=Product.objects.all()
+    
+    #for pagination
+    paginator = Paginator(products, 8) 
+    page = request.GET.get('page')
+    try:
+        products = paginator.page(page)
+    except PageNotAnInteger:
+        products = paginator.page(1)
+    except EmptyPage:
+        products = paginator.page(paginator.num_pages)
+
+
     return render(request, 'admin/admin_products.html', {'products': products})
 
 #view fucntion for editing the product 
@@ -72,6 +85,16 @@ def admin_product_variants_view(request):
         product_variants=Product_Variant.objects.filter(name__icontains=query)
     else:
         product_variants=Product_Variant.objects.all()
+
+    #for pagination
+    paginator = Paginator(product_variants, 8) 
+    page = request.GET.get('page')
+    try:
+        product_variants = paginator.page(page)
+    except PageNotAnInteger:
+        product_variants = paginator.page(1)
+    except EmptyPage:
+        product_variants = paginator.page(paginator.num_pages)
     return render(request, 'admin/admin_product_variants.html', {'product_variants': product_variants})
 
 #view fucntion for editing the product variant 
@@ -142,44 +165,53 @@ def all_products_view(request):
     pet_type_ids = request.GET.getlist('pet_type')
     category_ids = request.GET.getlist('category')
     sort_by = request.GET.get('sort_by')
-   
+    page = request.GET.get('page', 1)
+
     products = Product_Variant.objects.filter(is_active=True)
 
     if pet_type_ids:
         products = products.filter(product_name__pet_type__id__in=pet_type_ids)
     if category_ids:
         products = products.filter(product_name__category__id__in=category_ids)
-        
-    
-    
-    if sort_by=='price_low_high':        
-        products=products.order_by('price')
-    elif sort_by=='price_high_low':
-        products=products.order_by('-price')
-    elif sort_by=='az':
-        products=products.order_by('product_name__name')
-    elif sort_by=='za':
-        products=products.order_by('-product_name__name')
 
-   
+    if sort_by == 'price_low_high':        
+        products = products.order_by('price')
+    elif sort_by == 'price_high_low':
+        products = products.order_by('-price')
+    elif sort_by == 'az':
+        products = products.order_by('product_name__name')
+    elif sort_by == 'za':
+        products = products.order_by('-product_name__name')
 
-    #for paginator
-   
-    paginator=Paginator(products,9)
-    page=request.GET.get('page')
-    paged_products=paginator.get_page(page)
+    paginator = Paginator(products, 9)
+    paged_products = paginator.get_page(page)
 
-    context={
+    context = {
         'products': paged_products,
-        'pet_types' : PetType.objects.filter(is_active=True),
-        'categories' : Category.objects.filter(is_active=True),
-        'count' :products.count(),
+        'pet_types': PetType.objects.filter(is_active=True),
+        'categories': Category.objects.filter(is_active=True),
+        'count': products.count(),
         'selected_pet_types': pet_type_ids,
         'selected_categories': category_ids, 
     }
 
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        html = render_to_string(
+            template_name="user_home/product_list_partial.html", 
+            context=context
+        )
+        data = {
+            "html": html,
+            "has_next": paged_products.has_next(),
+            "has_previous": paged_products.has_previous(),
+            "page": paged_products.number,
+            "total_pages": paginator.num_pages,
+            "count": products.count()
+        }
+        return JsonResponse(data)
 
     return render(request, 'user_home/all_products.html', context)
+
 
 
 #view function for viewing single product

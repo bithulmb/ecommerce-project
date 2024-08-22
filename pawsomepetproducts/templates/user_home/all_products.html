@@ -3,22 +3,22 @@
 {% block csslinking %}
 <script>
     $(document).ready(function() {
-        function fetchProducts() {
-            // Get serialized data from both forms
+        function fetchProducts(page) {
             var petTypeData = $('#filterpettypeform').serialize();
             var categoryData = $('#filtercategoryform').serialize();
             var sortByData = $('#sortForm').serialize();
+            var pageData = page ? 'page=' + page : '';
     
-            // Combine all data into one request
-            var requestData = petTypeData + '&' + categoryData + '&' + sortByData;
+            var requestData = petTypeData + '&' + categoryData + '&' + sortByData + '&' + pageData;
     
             $.ajax({
                 url: '{% url "all_products_page" %}',  
                 type: 'GET',
                 data: requestData,
                 success: function(response) {
-                    $('#products-list').html($(response).find('#products-list').html());
-                    $('.product-count').text($(response).find('.product-count').text());
+                    $('#products-list').html(response.html);
+                    $('.product-count').text(response.count + ' Items found');
+                    updatePaginationButtons(response);
                 },
                 error: function(xhr, status, error) {
                     console.log('Error: ' + error);
@@ -26,12 +26,35 @@
             });
         }
     
+        function updatePaginationButtons(response) {
+            $('.pagination .page-item').removeClass('active');
+            $('.pagination .page-item').removeClass('disabled');
+            
+            if (!response.has_previous) {
+                $('.pagination .page-item:first').addClass('disabled');
+            }
+            if (!response.has_next) {
+                $('.pagination .page-item:last').addClass('disabled');
+            }
+            
+            $('.pagination .page-item:nth-child(' + (response.page + 1) + ')').addClass('active');
+        }
+    
         // Trigger AJAX on filter or sort change
         $('#filterpettypeform input, #filtercategoryform input, #sortForm select').on('change', function() {
             fetchProducts();
         });
+    
+        // Handle pagination clicks
+        $(document).on('click', '.pagination .page-link', function(e) {
+            e.preventDefault();
+            var page = $(this).data('page');
+            if (page) {
+                fetchProducts(page);
+            }
+        });
     });
-</script>
+    </script>
 
 {% endblock %}
 
@@ -45,7 +68,7 @@
 <section class="section-pagetop bg">
     <div class="container">
       
-        <h1 class="title-page text-center">All Products</h1>
+        <h1 class="title-page text-center">All products</h1>
        
         
     </div> <!-- container //  -->
@@ -129,74 +152,11 @@
             </div>  
           </div>
     </header><!-- sect-heading -->
+
     <div id="products-list">
-
-        <div class="row">
-            {% for product in products %}
-
-
-            <div class="col-md-4">
-                <a href="{% url 'single_product_page' product.id %}">
-                <figure class="card card-product-grid">
-                    <div class="img-wrap"> 
-                        
-                        <img src="{{product.thumbnail.url}}">
-                        
-                    </div> <!-- img-wrap.// -->
-                    <figcaption class="info-wrap">
-                    <div class="fix-height">
-                        {% if product.size is not None %}
-                        <a href="{% url 'single_product_page' product.id %}" class="title">{{product.product_name.name}} , {{product.size}}</a>
-                        {% else %}
-                        <a href="{% url 'single_product_page' product.id %}" class="title">{{product.product_name.name}} </a>
-                        {% endif %}
-                        <div class="price-wrap mt-2">
-                            <span class="price">₹ {{product.price}}</span>
-                            <!-- <del class="price-old">$1980</del> -->
-                        </div> <!-- price-wrap.// -->
-                    </div>
-                    <a href="{% url 'single_product_page' product.id %}" class="btn btn-block btn-success">View Product </a>
-                </figcaption>
-            </figure>
-        </a>
-        </div> <!-- col.// -->
-        {% endfor %}
-        
-    </div> <!-- row end.// -->
-
+        {% include 'user_home/product_list_partial.html' %}
     </div>
-        
-    
-    {% if products.has_other_pages %}
-    <nav class="mt-4" aria-label="Page navigation sample">
-      <ul class="pagination">
-
-        {% if products.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{products.previous_page_number}}">Previous</a></li>
-        {% else %}
-        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-        {% endif %}
-
-        {% for i in products.paginator.page_range %}
-
-            {% if products.number == i %}
-            <li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
-            {% else %}
-            <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
-            {% endif %}
-
-        {% endfor %}
-        
-        {% if products.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{products.next_page_number}}">Next</a></li>
-        {% else %}
-        <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
-        {% endif %}
-      
-    </ul>
-    </nav>
-    {% endif %}
-
+ 
     
         </main> <!-- col.// -->
     

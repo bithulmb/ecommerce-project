@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
 from accounts.decorators import superuser_required
+from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
+
 
 # Create your views here.
 
@@ -17,6 +19,18 @@ def admin_pet_type_view(request):
         pet_types=PetType.objects.filter(name__icontains=query)
     else:
         pet_types=PetType.objects.all()
+    
+    #for pagination
+    paginator = Paginator(pet_types, 8) 
+    page = request.GET.get('page')
+    try:
+        pet_types = paginator.page(page)
+    except PageNotAnInteger:
+        pet_types = paginator.page(1)
+    except EmptyPage:
+        pet_types = paginator.page(paginator.num_pages)
+
+        
     return render(request, 'admin/admin_pet_type.html', {'pet_types': pet_types})
 
 

@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
 from accounts.decorators import superuser_required
-
+from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
 
 # Create your views here.
 
@@ -19,6 +19,18 @@ def admin_category_view(request):
         categories=Category.objects.filter(name__icontains=query)
     else:
         categories=Category.objects.all()
+
+    #for pagination
+    paginator = Paginator(categories, 8) 
+    page = request.GET.get('page')
+    try:
+        categories = paginator.page(page)
+    except PageNotAnInteger:
+        categories = paginator.page(1)
+    except EmptyPage:
+        categories = paginator.page(paginator.num_pages)
+
+    
     return render(request, 'admin/admin_category.html', {'categories': categories})
 
 #view function for adding new category

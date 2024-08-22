@@ -17,6 +17,8 @@ import razorpay
 from django.conf import settings
 from django.http import HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
 
 client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
 
@@ -34,6 +36,19 @@ def admin_orders_view(request):
         orders=Order.objects.filter(Q(user__first_name__icontains=query) | Q(user__last_name__icontains=query) | Q(user__email__icontains=query) | Q(order_number__icontains=query))
     else:
         orders=Order.objects.filter(is_ordered=True).order_by('-created_at')
+    
+    #for pagination
+    paginator = Paginator(orders, 8) 
+    page = request.GET.get('page')
+    try:
+        orders = paginator.page(page)
+    except PageNotAnInteger:
+        orders = paginator.page(1)
+    except EmptyPage:
+        orders = paginator.page(paginator.num_pages)
+    
+
+
     return render(request,'admin/admin_orders.html', {'orders':orders})
 
 
