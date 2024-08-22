@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
+from accounts.decorators import superuser_required
 import razorpay
 from django.conf import settings
 from django.http import HttpResponseBadRequest
@@ -25,7 +26,7 @@ client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET
 #-------------------------------------admin side views------------------
 
 #view for listing the orders in adminpanel
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_orders_view(request):
     query=request.GET.get('q')
@@ -36,7 +37,7 @@ def admin_orders_view(request):
     return render(request,'admin/admin_orders.html', {'orders':orders})
 
 
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_order_details_view(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -45,7 +46,7 @@ def admin_order_details_view(request, order_id):
         order.status = status
         order.save()
         messages.success(request, 'Order status updated successfully.')
-        return redirect('admin_order_details', order_id=order_id)
+        return redirect('admin_orders')
     order_items = OrderProduct.objects.filter(order=order)
     payment_details=get_object_or_404(Payment, order=order)
     

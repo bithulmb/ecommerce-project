@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from .models import CustomUser,Address
 from django.db.models import Q
-from .forms import RegisterForm,CustomUserUpdateForm,UserProfileForm,AddAddressForm,OTPVerificationForm
+from .forms import RegisterForm,CustomUserUpdateForm,UserProfileForm,AddAddressForm,OTPVerificationForm,LoginForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.views.decorators.cache import never_cache
@@ -18,6 +18,8 @@ from django.contrib.auth.decorators import login_required
 from cart.models import Cart,CartItem
 from cart.views import _cart_id
 import requests
+from .decorators import superuser_required
+
 
 # Create your views here.
 
@@ -27,7 +29,7 @@ import requests
 
 #view function for listing the users in admin panel
 
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_users_view(request):
     query=request.GET.get('q')
@@ -38,7 +40,7 @@ def admin_users_view(request):
     return render(request, 'admin/admin_users.html', {'users':users})
 
 
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_edit_user_view(request, pk):
     object=CustomUser.objects.get(id=pk)
@@ -46,6 +48,7 @@ def admin_edit_user_view(request, pk):
         form=CustomUserUpdateForm(request.POST, instance = object)
         if form.is_valid():
             form.save()
+            messages.success(request,"User status updated succesfully")
             return redirect('admin_users')
     else:
         form=CustomUserUpdateForm(instance = object)
@@ -64,44 +67,54 @@ def login_view(request):
         return redirect('home_page')
         
     #Getting the details for signing in
-    if request.method=="POST":
-        email       = request.POST.get("email")
-        password    = request.POST.get("password")
-       
-        user        = authenticate(request, email=email, password=password)
-       
-        if user is not None:
-            #checking whether there are any items in cart in current session
-            try:
-                cart=Cart.objects.get(cart_id=_cart_id(request))
-                is_cart_item_exists=CartItem.objects.filter(cart=cart).exists()
-                if is_cart_item_exists:
-                    cart_item=CartItem.objects.filter(cart=cart)
-                    for item in cart_item:
-                        item.user=user
-                        item.save()
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
 
-            except:
-                pass
+            user= authenticate(request, email=email, password=password)
 
-            login(request,user)
+            if user is not None:
+                #checking whether there are any items in cart in current session
+                try:
+                    cart=Cart.objects.get(cart_id=_cart_id(request))
+                    is_cart_item_exists=CartItem.objects.filter(cart=cart).exists()
+                    if is_cart_item_exists:
+                        cart_item=CartItem.objects.filter(cart=cart)
+                        for item in cart_item:
+                            item.user=user
+                            item.save()
 
-            #for redirecting to the url mentioned in next while logging in
-            url=request.META.get('HTTP_REFERER')
-            try:
-                query=requests.utils.urlparse(url).query
-                params=dict(x.split("=") for x in query.split("&"))
-                if 'next' in params:
-                    nextPage=params['next']
-                    return redirect(nextPage)
-            except:
-                pass
-            
-            return redirect('home_page')
+                except:
+                    pass
+
+                login(request,user)
+
+                #for redirecting to the url mentioned in next while logging in
+                url=request.META.get('HTTP_REFERER')
+                try:
+                    query=requests.utils.urlparse(url).query
+                    params=dict(x.split("=") for x in query.split("&"))
+                    if 'next' in params:
+                        nextPage=params['next']
+                        return redirect(nextPage)
+                except:
+                    pass
+                
+                return redirect('home_page')
+            else:
+                messages.error(request,"Invalid Credentials. Try Again")
+                return redirect('login_page')
         else:
-            messages.error(request,"Invalid Credentials. Try Again")
-            return redirect('login_page')
-    return render(request,'user_home/login.html')
+           
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = LoginForm()
+    
+    return render(request, 'user_home/login.html', {'form': form})
+
+
 
 @never_cache
 def signup_view(request):

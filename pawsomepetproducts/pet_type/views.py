@@ -4,11 +4,12 @@ from .forms import AddPetTypeForm
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
+from accounts.decorators import superuser_required
 
 # Create your views here.
 
 #view function for the listing of the pet types and searching pet types
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_pet_type_view(request):
     query=request.GET.get('q')
@@ -20,13 +21,14 @@ def admin_pet_type_view(request):
 
 
 #view function for adding pet type
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_add_pet_type_view(request):
     if request.method == 'POST':        
         form=AddPetTypeForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request,"Pet Type added succesfully")
             return redirect('admin_pet_type')
     else:
         form=AddPetTypeForm()
@@ -34,7 +36,7 @@ def admin_add_pet_type_view(request):
 
 
 #view function for editing the pet types.
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_edit_pet_type_view(request,pk):
     object=PetType.objects.get(id=pk)
@@ -42,6 +44,7 @@ def admin_edit_pet_type_view(request,pk):
         form=AddPetTypeForm(request.POST, instance = object)
         if form.is_valid():
             form.save()
+            messages.success(request,"Pet Type details updated succesfully")
             return redirect('admin_pet_type')
     else:
         form=AddPetTypeForm(instance = object)

@@ -4,13 +4,14 @@ from .forms import AddCategoryForm
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.cache import never_cache
+from accounts.decorators import superuser_required
 
 
 # Create your views here.
 
 
 #view function for listing categories and searching in category manangement page
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_category_view(request):
     query=request.GET.get('q')
@@ -21,13 +22,14 @@ def admin_category_view(request):
     return render(request, 'admin/admin_category.html', {'categories': categories})
 
 #view function for adding new category
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_add_category_view(request):
     if request.method == 'POST':        
         form=AddCategoryForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request,"Category added succesfully")
             return redirect('admin_category')
     else:
         form=AddCategoryForm()
@@ -35,7 +37,7 @@ def admin_add_category_view(request):
 
 
 #view function for editing category
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_edit_category_view(request,pk):
     object=Category.objects.get(id=pk)
@@ -43,6 +45,7 @@ def admin_edit_category_view(request,pk):
         form=AddCategoryForm(request.POST, instance = object)
         if form.is_valid():
             form.save()
+            messages.success(request,"Category details updated succesfully")
             return redirect('admin_category')
     else:
         form=AddCategoryForm(instance = object)

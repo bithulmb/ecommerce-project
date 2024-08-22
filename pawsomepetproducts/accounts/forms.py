@@ -4,7 +4,9 @@ from django import forms
 from django.contrib.auth.forms import UserChangeForm
 import re
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Row, Column
+from crispy_forms.layout import Layout, Field
+import requests
+
 
 #User Sign Up Form
 class RegisterForm(UserCreationForm):
@@ -116,6 +118,13 @@ class AddAddressForm(forms.ModelForm):
         pincode = self.cleaned_data.get('pincode')
         if not re.match(r'^\d{6}$', pincode):
             raise forms.ValidationError("PIN Code must be exactly 6 digits.")
+        
+        response = requests.get(f'https://api.postalpincode.in/pincode/{pincode}')
+        if response.status_code == 200:
+            data = response.json()
+            if data[0]['Status'] == 'Success':
+                return pincode
+        raise forms.ValidationError('Enter a valid pincode.')
         return pincode
 
     def clean_contact_number(self):
@@ -127,3 +136,14 @@ class AddAddressForm(forms.ModelForm):
 class OTPVerificationForm(forms.Form):
     otp=forms.CharField(label="Enter the OTP", max_length=10,min_length=6)
 
+class LoginForm(forms.Form):
+    email = forms.EmailField(
+        required=True, 
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'})
+    )
+    password = forms.CharField(
+        required=True, 
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'})
+    )   
+
+       

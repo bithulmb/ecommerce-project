@@ -16,13 +16,14 @@ from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
 import base64
 from wishlist.models import Wishlist
+from accounts.decorators import superuser_required
 
 
 # Create your views here.
 #-------------------------admin side views----------------------------------
 
 #view function for listing the products
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_products_view(request):
     query=request.GET.get('q')
@@ -33,7 +34,7 @@ def admin_products_view(request):
     return render(request, 'admin/admin_products.html', {'products': products})
 
 #view fucntion for editing the product 
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_edit_product_view(request,pk):
     object=Product.objects.get(id=pk)
@@ -41,19 +42,21 @@ def admin_edit_product_view(request,pk):
         form=AddProductForm(request.POST, instance = object)
         if form.is_valid():
             form.save()
+            messages.success(request," Product details updated succesfully")
             return redirect('admin_products')
     else:
         form=AddProductForm(instance = object)
     return render(request, 'admin/admin_edit_product.html', {'form':form})
 
 #view function for adding new product
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_add_product_view(request):
     if request.method == 'POST':        
         form=AddProductForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, "Product added succesfully")
             return redirect('admin_products')
     else:
         form=AddProductForm()
@@ -61,7 +64,7 @@ def admin_add_product_view(request):
 
 
 #view fucntion for listing product variants
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_product_variants_view(request):
     query=request.GET.get('q')
@@ -72,7 +75,7 @@ def admin_product_variants_view(request):
     return render(request, 'admin/admin_product_variants.html', {'product_variants': product_variants})
 
 #view fucntion for editing the product variant 
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_edit_product_variant_view(request,pk):
     object=Product_Variant.objects.get(id=pk)
@@ -80,6 +83,7 @@ def admin_edit_product_variant_view(request,pk):
         form=AddProductVariantForm(request.POST, instance = object)
         if form.is_valid():
             form.save()
+            messages.success(request,"Product Variant details updated succesfully")
             return redirect('admin_product_variants')
     else:
         form=AddProductVariantForm(instance = object)
@@ -87,20 +91,21 @@ def admin_edit_product_variant_view(request,pk):
 
 
 #view function for adding new product variant
-@staff_member_required(login_url="admin_login")
+@superuser_required
 @never_cache
 def admin_add_product_variant_view(request):
     if request.method == 'POST':        
         form=AddProductVariantForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
+            messages.success(request,"Product Variant added succesfully")
             return redirect('admin_product_variants')
     else:
         form=AddProductVariantForm()
     return render(request, 'admin/admin_add_product_variant.html', {'form':form})
 
 #view for adding images and editing images for product variants
-@staff_member_required(login_url="admin_login") 
+@superuser_required
 @never_cache  
 def admin_add_edit_product_images_view(request, variant_id):
     variant = get_object_or_404(Product_Variant, id=variant_id)

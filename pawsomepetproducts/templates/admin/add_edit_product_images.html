@@ -92,11 +92,33 @@
         const crop_btn = document.getElementById('crop-btn')
         // id_image is the id of the input tag where we will upload the image
         const input = document.getElementById('id_image')
+
+        // Function to validate file type
+        function validateFileType(file) {
+        const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        return acceptedImageTypes.includes(file.type);
+        }
     
         // When user uploads the image this event will get triggered
         input.addEventListener('change', ()=>{
           // Getting image file object from the input variable
           const img_data = input.files[0]
+
+
+              // Validate if a file is selected
+        if (!img_data) {
+            alert("Please select an image file.");
+            return;
+        }
+
+          // Validate file type
+        if (!validateFileType(img_data)) {
+            alert("Please select a valid image file (JPEG, PNG, WEBP or GIF).");
+            input.value = ''; // Clear the input
+            return;
+        }
+  
+
           // createObjectURL() static method creates a DOMString containing a URL representing the object given in the parameter.
           // The new object URL represents the specified File object or Blob object.
           const url = URL.createObjectURL(img_data)
