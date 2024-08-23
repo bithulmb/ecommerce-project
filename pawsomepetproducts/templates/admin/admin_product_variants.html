@@ -48,7 +48,9 @@
                             <th scope="col">Size</th>
                             <th scope="col">Price in Rs</th>
                             <th scope="col">Stock Qty</th>
-                            <th scope="col">Images</th>
+                            <th scope="col">Is Featured</th>
+                            <th scope="col">Average Rating</th>
+                            <!-- <th scope="col">Images</th> -->
                             <th scope="col">Is Active</th>
                             <th scope="col" class=""> Action </th>
                         </tr>
@@ -62,11 +64,13 @@
                             <td class="align-middle"><b>{{product_variant.size}}</b></td>
                             <td class="align-middle"><b>{{product_variant.price}}</b></td>
                             <td class="align-middle"><b>{{product_variant.stock}}</b></td>
-                            <td class="align-top">
+                            <td class="align-middle"><b>{{product_variant.is_featured}}</b></td>
+                            <td class="align-middle"><b>{{product_variant.average_rating}}</b></td>
+                            <!-- <td class="align-top">
                                 {% for image in product_variant.images.all %}
                                 <img src="{{image.images.url}}" class="img-sm img-thumbnail" alt="image1">
                                 {% endfor %}
-                            </td>
+                            </td> -->
                             <td class="align-middle">{{product_variant.is_active}}</td>
                             <td class="align-middle">
                                 <a href="{% url 'admin_edit_product_variant' product_variant.id %}"class="btn btn-md rounded font-sm">Edit</a>

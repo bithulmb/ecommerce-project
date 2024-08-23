@@ -142,9 +142,9 @@
         <!-- <option value="popularity">Popularity</option> -->
         <option value="price_low_high" {% if request.GET.sort_by == 'price_low_high' %}selected{% endif %} >Price: Low to High</option>
         <option value="price_high_low" {% if request.GET.sort_by == 'price_high_low' %}selected{% endif %}>Price: High to Low</option>
-        <!-- <option value="average_rating">Average Rating</option> -->
-        <!-- <option value="featured">Featured</option>
-        <option value="new_arrivals">New Arrivals</option> -->
+        <option value="average_rating" {% if request.GET.sort_by == 'average_rating' %}selected{% endif %}>Average Rating</option>
+        <option value="featured"{% if request.GET.sort_by == 'featured' %}selected{% endif %}>Featured</option>
+        <!-- <option value="new_arrivals">New Arrivals</option> -->
         <option value="az" {% if request.GET.sort_by == 'az' %}selected{% endif %}>A - Z</option>
         <option value="za"{% if request.GET.sort_by == 'za' %}selected{% endif %}>Z - A</option>
     </select>

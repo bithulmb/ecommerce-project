@@ -1,9 +1,9 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from .models import Product_Variant,Product_Images
+from .models import Product_Variant,Product_Images,ReviewRating
 from .models import Product
 from pet_type.models import PetType
 from category.models import Category
-from .forms import AddProductForm,AddProductVariantForm,AddProductImages
+from .forms import AddProductForm,AddProductVariantForm,AddProductImages,ReviewForm
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
@@ -17,6 +17,9 @@ from django.core.files.base import ContentFile
 import base64
 from wishlist.models import Wishlist
 from accounts.decorators import superuser_required
+from django.contrib.auth.decorators import login_required
+from orders.models import OrderProduct
+from django.db.models import Avg
 
 
 
@@ -31,7 +34,7 @@ def admin_products_view(request):
     if query:
         products=Product.objects.filter(name__icontains=query)
     else:
-        products=Product.objects.all()
+        products=Product.objects.all().order_by('-id')
     
     #for pagination
     paginator = Paginator(products, 8) 
@@ -84,7 +87,7 @@ def admin_product_variants_view(request):
     if query:
         product_variants=Product_Variant.objects.filter(name__icontains=query)
     else:
-        product_variants=Product_Variant.objects.all()
+        product_variants=Product_Variant.objects.all().order_by('-id')
 
     #for pagination
     paginator = Paginator(product_variants, 8) 
@@ -167,7 +170,7 @@ def all_products_view(request):
     sort_by = request.GET.get('sort_by')
     page = request.GET.get('page', 1)
 
-    products = Product_Variant.objects.filter(is_active=True)
+    products = Product_Variant.objects.filter(is_active=True).order_by('-id')
 
     if pet_type_ids:
         products = products.filter(product_name__pet_type__id__in=pet_type_ids)
@@ -182,6 +185,11 @@ def all_products_view(request):
         products = products.order_by('product_name__name')
     elif sort_by == 'za':
         products = products.order_by('-product_name__name')
+    elif sort_by == 'average_rating':
+        products = products.order_by('-average_rating')
+    elif sort_by == 'featured':
+        products = products.order_by('-is_featured')
+       
 
     paginator = Paginator(products, 9)
     paged_products = paginator.get_page(page)
@@ -220,15 +228,29 @@ def single_product_view(request, pk):
     product_variant = Product_Variant.objects.get(id=pk)
     all_variants = Product_Variant.objects.filter(product_name = product_variant.product_name)
     in_cart=CartItem.objects.filter(cart__cart_id=_cart_id(request),variant=product_variant).exists() #checking if the item is already added to the cart   
+    
+    #checking if the item is in wishlist for displaying wishlist button
     in_wishlist=False
     if request.user.is_authenticated:
         in_wishlist=Wishlist.objects.filter(user=request.user, product_variant=product_variant).exists()
+    
+    #checking if the product is ordered by user to display the review form
+    try:        
+        product_ordered=OrderProduct.objects.filter(order__user=request.user, product = product_variant).exists()
+        
+    except:
+        product_ordered=False
+
+    #getting the reviews related to the product
+    reviews=ReviewRating.objects.filter(product_variant=product_variant, status=True)
 
     context = {
         'product_variant': product_variant,
         'all_variants': all_variants,
         'in_cart'   : in_cart,
         'in_wishlist':in_wishlist,
+        'product_ordered' : product_ordered,
+        'reviews'   :reviews
     }
     return render(request, 'user_home/single_product.html', context)
 
@@ -285,3 +307,32 @@ def search_products_view(request):
     }
 
     return render(request, 'user_home/search_products.html', context)
+
+
+#view for submitting reviews
+@login_required(login_url='login_page')
+def submit_review_view(request,variant_id):
+    url = request.META.get('HTTP_REFERER')
+    if request.method == "POST":
+        try:
+            reviews = ReviewRating.objects.get(user__id = request.user.id, product_variant__id = variant_id)
+            form    = ReviewForm(request.POST, instance = reviews)
+           
+            form.save()
+            messages.success(request, "Thank You. Your review has been updated")
+            
+            return redirect(url)
+
+        except ReviewRating.DoesNotExist:
+            form    = ReviewForm(request.POST)
+            if form.is_valid():
+                data = ReviewRating()
+                data.subject = form.cleaned_data['subject']
+                data.review = form.cleaned_data['review']
+                data.rating = form.cleaned_data['rating']
+                data.product_variant_id = variant_id
+                data.user_id = request.user.id
+                data.save()
+                messages.success(request, "Thank You. Your review has been submitted")
+                return redirect(url)
+

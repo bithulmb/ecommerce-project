@@ -47,6 +47,8 @@ urlpatterns = [
     path('products/', product_views.all_products_view, name='all_products_page'),  #userside all products page
     path('products/<int:pk>',product_views.single_product_view, name='single_product_page'),
     path('products/search/',product_views.search_products_view, name='search_products'),
+    path('products/<int:variant_id>/submit-review',product_views.submit_review_view, name='submit_review'),
+
 
 
     #views from cart app

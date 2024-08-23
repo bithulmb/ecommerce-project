@@ -1,4 +1,4 @@
-from .models import Product,Product_Variant,Product_Images
+from .models import Product,Product_Variant,Product_Images,ReviewRating
 from django.forms import ModelForm
 from django.core.exceptions import ValidationError
 
@@ -10,7 +10,8 @@ class AddProductForm(ModelForm):
 class AddProductVariantForm(ModelForm):
     class Meta:
         model   = Product_Variant
-        fields  =   "__all__"
+        
+        exclude = ['average_rating','popularity']
         
        
     def clean_price(self):
@@ -29,5 +30,11 @@ class AddProductVariantForm(ModelForm):
 
 class AddProductImages(ModelForm):
     class Meta:
-        model   =Product_Images
+        model  = Product_Images
         fields = ['images',]
+
+
+class ReviewForm(ModelForm):
+    class Meta:
+        model   = ReviewRating
+        fields  = ['subject', 'review', 'rating' ]
