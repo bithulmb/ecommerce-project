@@ -1,6 +1,10 @@
 from django.db import models
 from accounts.models import CustomUser,Address
 from product.models import Product,Product_Variant
+from coupons.models import Coupon
+
+
+
 # Create your models here.
 class Payment(models.Model):
     user            = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
@@ -33,12 +37,18 @@ class Order(models.Model):
     payment         = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
     address         = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
     order_number    = models.CharField(max_length=20)
+   
     total_amount    = models.DecimalField(max_digits=8, decimal_places=2)
     status          = models.CharField(max_length=20, choices=STATUS, default='Processing')
     is_ordered      = models.BooleanField(default=False)
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)
 
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
+    discount_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    order_total     = models.DecimalField(max_digits=8, decimal_places=2, null=True)
+    shipping_charge  = models.DecimalField(max_digits=8, decimal_places=2, null = True)
+    
     def __str__(self):
         return self.order_number
     

@@ -6,6 +6,7 @@ from cart import views as cart_views
 from orders import views as order_views 
 from django.contrib.auth import views as auth_views
 from wishlist import views as wishlist_views
+from coupons import views as coupon_views
 
 
 
@@ -69,6 +70,9 @@ urlpatterns = [
     path('user/orders/<str:order_number>/cancel', order_views.user_cancel_order_view, name="user_cancel_order"),
     #razor pay urls
     path('user/payment/status', order_views.payment_status, name="payment_status"),
+    #views from coupon app
+    path('orders/apply-coupon/', coupon_views.apply_coupon_view, name='apply_coupon'),
+     path('orders/remove-coupon/', coupon_views.remove_coupon_view, name='remove_coupon'),
     
 
     #views from wishlist app

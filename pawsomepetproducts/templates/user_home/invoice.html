@@ -1,46 +1,146 @@
-<!-- templates/invoice.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Invoice</title>
-    <style>
-        /* Add some basic styling for the invoice */
-        body { font-family: Arial, sans-serif; }
-        .invoice-box { width: 100%; }
-        .invoice-box table { width: 100%; line-height: 1.6; text-align: left; }
-        .invoice-box table td { padding: 8px; vertical-align: top; }
-    </style>
-</head>
-<body>
-    <div class="invoice-box">
-        <h1>Invoice</h1>
-        <p><strong>Order Number:</strong> {{ order.order_number }}</p>
-        <p><strong>Date:</strong> {{ order.created_at|date:"Y-m-d" }}</p>
+{% extends 'base.html' %}
+{% block csslinking %}
+<style>
+    /* Add some basic styling for the invoice */
+    body { font-family: Arial, sans-serif; }
+    .invoice-box { width: 100%; }
+    .invoice-box table { width: 100%; line-height: 1.6; text-align: left; }
+    .invoice-box table td { padding: 8px; vertical-align: top; }
+</style>
 
-        <h2>Items:</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in order.items.all %}
-                <tr>
-                    <td>{{ item.product.product_name }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>{{ item.product_price }}</td>
-                    <td>{{ item.subtotal }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        
-        <p><strong>Total Amount:</strong> {{ order.total_amount }}</p>
+{% endblock %}
+
+{% block content %}
+
+{% load static %}
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y bg">
+
+    <div class="container">
+        <div class="row">
+        {% include 'user_home/user_dashboard.html' %}
+        <main class="col-md-9">
+            <article class="card">
+            <div class="card-body">
+               
+                <div class="col"><header class=""><h2 class=" text-center ">Order Invoice</h2></header></div> 
+<div class="container" style="margin: 0 auto;padding: 50px;background: #f1f1f1;margin-top: 50px;margin-bottom: 50px;">
+    <div class="row invoice row-printable">
+        <div class="col-md-12">
+            <!-- col-lg-12 start here -->
+            <div class="panel panel-default plain" id="dash_0">
+                <!-- Start .panel -->
+                <div class="panel-body p30">
+                    <div class="row">
+                        <!-- Start .row -->
+                        <div class="col-lg-6">
+                            <!-- col-lg-6 start here -->
+                            <div class="invoice-logo"><img src="{% static 'user/images/logo.png' %}" alt="Invoice logo" style="max-height: 40px;"></div>
+                        </div>
+                        <!-- col-lg-6 end here -->
+                        <div class="col-lg-6">
+                            <!-- col-lg-6 start here -->
+                            <div class="invoice-from">
+                                <ul class="list-unstyled text-right">
+                                    <li><strong>Invoiced To</strong></li>
+                                    <li>{{order.address.name}}</li>
+                                    <li>{{order.address.address_line1}}, {{order.address.address_line2}}</li>
+                                    <li>{{order.address.town}}, {{order.address.city}},  </li>
+                                    <li>{{order.address.state}} - {{order.address.pincode}}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- col-lg-6 end here -->
+                        <div class="col-lg-12">
+                            <!-- col-lg-12 start here -->
+                            <div class="invoice-details mt25">
+                                <div class="well">
+                                    <ul class="list-unstyled mb0">
+                                        <li><strong>Order</strong># {{order.order_number}} </li>
+                                        
+                                        <li><strong>Order Date:</strong> {{order.created_at}}</li>
+                                        <li><strong>Payment Method:</strong> {{order.payment_method}}</li>
+                                        <li><strong>Transaction</strong> # {{order.payment.payment_id}}</li>
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+                           
+                            <div class="invoice-items">
+                                <div class="table-responsive" style="overflow: hidden; outline: none;" tabindex="0">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th class="per55 text-center">Description</th>
+                                                <th class="per5 text-center">Qty</th>
+                                                <th class="per15 text-center">Price</th>
+                                                <th class="per25 text-center">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in order.items.all %}
+                                            <tr>
+                                                <td>{{item.product.product_name}}</td>
+                                                <td class="text-center">{{item.quantity}}</td>
+                                                <td class="text-center">₹ {{item.product_price}}</td>
+                                                <td class="text-center">₹ {{item.subtotal}}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="3" class="text-right">Sub Total:</th>
+                                                <th class="text-center">₹ {{order.order_total}}</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="3" class="text-right">Shipping Charge:</th>
+                                                <th class="text-center">₹ {{order.shipping_charge}}</th>
+                                            </tr>
+                                            {% if order.coupon %}
+                                            <tr>
+                                                <th colspan="3" class="text-right">Coupon Discount:</th>
+                                                <th class="text-center">₹ {{order.discount_amount}}</th>
+                                            </tr>
+                                            {% endif %}
+                                            <tr>
+                                                <th colspan="3" class="text-right">Grand Total:</th>
+                                                <th class="text-center"> ₹ {{order.total_amount}}</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="invoice-footer mt25">
+                                <p class="text-center">Thank you for shopping with us!</p>
+                            </div>
+                        </div>
+                        <!-- col-lg-12 end here -->
+                    </div>
+                    <!-- End .row -->
+                </div>
+            </div>
+            <!-- End .panel -->
+        </div>
+        <!-- col-lg-12 end here -->
     </div>
-</body>
-</html>
+    </div>
+    <div class="text-center">
+                    
+        <a href="{% url 'user_orders' %}" class="btn btn-secondary">Back To Orders</a>
+    
+</div>
+
+           
+            </div> <!-- card-body .// -->
+            </article> <!-- order-group.// --> 
+        </main>
+    </div> <!-- row.// -->
+    </div>
+    
+    
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+    
+
+
+{% endblock %}

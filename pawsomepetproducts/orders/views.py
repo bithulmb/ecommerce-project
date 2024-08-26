@@ -18,6 +18,8 @@ from django.conf import settings
 from django.http import HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from coupons.models import Coupon
+from decimal import Decimal
 
 
 client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
@@ -111,7 +113,7 @@ def place_order_view(request):
     
     current_user=request.user
 
-   
+    
     cart_items = CartItem.objects.filter(user=current_user)
     cart_count = cart_items.count()
     
@@ -131,6 +133,18 @@ def place_order_view(request):
         shipping_charge=0
     grand_total = total + shipping_charge
 
+    if 'coupon_code' in request.session:
+        coupon_code = request.session.get('coupon_code')
+        coupon = Coupon.objects.get(code=coupon_code)
+    if 'discount' in request.session:
+        discount = Decimal(str(request.session.get('discount', '0')))
+   
+    
+    print(coupon, discount)
+    if coupon and discount:
+        grand_total = grand_total - discount
+
+    print(grand_total)
     if request.method =='POST':
         address_id = request.POST.get('address_id')
         payment_method = request.POST.get('payment_method')
@@ -143,8 +157,15 @@ def place_order_view(request):
             order_instance = Order()
             order_instance.user=current_user
             order_instance.address=address
+            order_instance.order_total=total
+            order_instance.shipping_charge = shipping_charge
             order_instance.total_amount=grand_total
             order_instance.payment_method="Cash On Delivery" 
+            
+            if coupon and discount:
+                order_instance.coupon = coupon
+                order_instance.discount_amount = discount
+                
             order_instance.save()
             
             # Generate order number
@@ -190,6 +211,11 @@ def place_order_view(request):
             #clearing the cart of the user
             cart_items.delete()
 
+            #clearing the coupon code and discount in session
+            if 'coupon_code' in request.session:
+                del request.session['coupon_code']
+            if 'discount' in request.session:
+                del request.session['discount']
 
             return redirect('order_success')
         
@@ -202,8 +228,13 @@ def place_order_view(request):
             order_instance = Order()
             order_instance.user = current_user
             order_instance.address = Address.objects.get(id=address_id)
+            order_instance.order_total=total
+            order_instance.shipping_charge = shipping_charge
             order_instance.total_amount = grand_total
-            order_instance.payment_method = "Online"
+            order_instance.payment_method = "Online"             
+            if coupon and discount:
+                order_instance.coupon = coupon
+                order_instance.discount_amount = discount
             order_instance.save()
 
             # Generate order number
@@ -306,6 +337,11 @@ def payment_status (request) :
 
             #clearing the cart of the user
             cart_items.delete()
+            #clearing the coupon code and discount in session
+            if 'coupon_code' in request.session:
+                del request.session['coupon_code']
+            if 'discount' in request.session:
+                del request.session['discount']
 
 
 
