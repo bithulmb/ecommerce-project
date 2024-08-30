@@ -26,8 +26,13 @@
     <!-- CropperJS JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
      
-    
+    <!-- Include Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+<!-- Include Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+ 
 
 </head>
 {% load active_link_tags %}
@@ -91,7 +96,7 @@
                 </li>
 
                 <li class="menu-item {% active_link 'admin_coupons || admin_edit_coupon || admin_add_coupon' %}">
-                    <a class="menu-link" href=""> <i class="icon material-icons md-local_offer"></i>
+                    <a class="menu-link" href="{% url 'admin_coupons' %}"> <i class="icon material-icons md-local_offer"></i>
                         <span class="text">Coupon Management</span>
                     </a>
                    

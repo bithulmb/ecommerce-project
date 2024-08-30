@@ -65,6 +65,7 @@ urlpatterns = [
         
     path('orders/success/', order_views.order_success_view, name="order_success"),
     path('order/invoice/<int:order_id>/', order_views.view_invoice, name='view_invoice'),
+    path('order/invoice/<int:order_id>/download-pdf/', order_views.download_invoice_pdf_view, name='download_invoice_pdf'),
     path('user/orders/', order_views.user_orders_view, name="user_orders"),
     path('user/orders/<str:order_number>/', order_views.user_order_details_view, name="user_order_details"),
     path('user/orders/<str:order_number>/cancel', order_views.user_cancel_order_view, name="user_cancel_order"),
@@ -72,7 +73,7 @@ urlpatterns = [
     path('user/payment/status', order_views.payment_status, name="payment_status"),
     #views from coupon app
     path('orders/apply-coupon/', coupon_views.apply_coupon_view, name='apply_coupon'),
-     path('orders/remove-coupon/', coupon_views.remove_coupon_view, name='remove_coupon'),
+    path('orders/remove-coupon/', coupon_views.remove_coupon_view, name='remove_coupon'),
     
 
     #views from wishlist app

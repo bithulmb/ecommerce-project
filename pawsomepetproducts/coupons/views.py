@@ -10,8 +10,16 @@ from django.contrib.auth.decorators import login_required
 from accounts.models import Address
 from django.contrib import messages
 from django.views.decorators.http import require_POST
+from accounts.decorators import superuser_required
+from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
+from .forms import AddCouponForm
+
+
 
 # Create your views here.
+
+# --------------------------------------user side views--------------------------------------
+
 
 #view function for applying coupon
 @login_required(login_url='login_page')
@@ -56,7 +64,7 @@ def apply_coupon_view(request):
             #checking the order amount is greater than the minumum ordr amount
             if grand_total >= coupon.minimum_order_amount: 
 
-                discount = round(grand_total*coupon.discount/100, 2) # calculating the discount and rounding off the decimal value to 2 points.
+                discount = round(grand_total*coupon.discount_percent/100, 2) # calculating the discount and rounding off the decimal value to 2 points.
                 # checking if the discount amount less than the maximum discount limit
                 if coupon.maximum_discount_limit:
                     if (discount) > coupon.maximum_discount_limit:            
@@ -101,3 +109,63 @@ def remove_coupon_view(request):
    
     messages.error(request,"Applied Coupon removed")
     return redirect('checkout_page')
+
+
+
+# -----------------------------------------------------admin side views-------------------------------------------------
+
+
+
+#view for admin side coupon management
+@superuser_required
+@never_cache
+def admin_coupons_view(request):
+    query=request.GET.get('q')
+    if query:
+        coupons=Coupon.objects.filter(code__icontains=query)
+    else:
+        coupons=Coupon.objects.all().order_by('-id')
+    
+    #for pagination
+    paginator = Paginator(coupons, 8) 
+    page = request.GET.get('page')
+    try:
+        coupons = paginator.page(page)
+    except PageNotAnInteger:
+        coupons = paginator.page(1)
+    except EmptyPage:
+        coupons = paginator.page(paginator.num_pages)
+
+
+    return render(request, 'admin/admin_coupons.html', {'coupons': coupons})
+
+#view function for adding new coupon
+@superuser_required
+@never_cache
+def admin_add_coupon_view(request):
+    if request.method == 'POST':        
+        form=AddCouponForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Coupon added succesfully")
+            return redirect('admin_coupons')
+    else:
+        form=AddCouponForm()
+    return render(request, 'admin/admin_add_coupon.html', {'form':form})
+
+
+
+#view fucntion for editing the coupon 
+@superuser_required
+@never_cache
+def admin_edit_coupon_view(request,coupon_id):
+    object=Coupon.objects.get(id=coupon_id)
+    if request.method == 'POST':
+        form=AddCouponForm(request.POST, instance = object)
+        if form.is_valid():
+            form.save()
+            messages.success(request," Coupon details updated succesfully")
+            return redirect('admin_coupons')
+    else:
+        form=AddCouponForm(instance = object)
+    return render(request, 'admin/admin_edit_coupon.html', {'form':form})

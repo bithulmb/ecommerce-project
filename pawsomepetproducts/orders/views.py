@@ -20,7 +20,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from coupons.models import Coupon
 from decimal import Decimal
-
+from django.template.loader import render_to_string
+from weasyprint import HTML
 
 client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
 
@@ -57,13 +58,16 @@ def admin_orders_view(request):
 @superuser_required
 @never_cache
 def admin_order_details_view(request, order_id):
+
     order = get_object_or_404(Order, id=order_id)
+
     if request.method == 'POST':
+
         status = request.POST.get('status')
         order.status = status
         order.save()
         messages.success(request, 'Order status updated successfully.')
-        return redirect('admin_orders')
+        return redirect('admin_order_details', order_id = order.id)
     order_items = OrderProduct.objects.filter(order=order)
     payment_details=get_object_or_404(Payment, order=order)
     
@@ -95,6 +99,14 @@ def checkout_view(request, total=0, quantity=0, cart_items=None):
     except ObjectDoesNotExist:
         pass
     addresses=Address.objects.filter(user=request.user)
+    available_coupons =  Coupon.objects.filter(active = True)
+
+    #clearing the coupon code and discount in session
+    if 'coupon_code' in request.session:
+        del request.session['coupon_code']
+    if 'discount' in request.session:
+        del request.session['discount']
+    
     context={
         'total':total,
         'quantity':quantity,
@@ -102,6 +114,7 @@ def checkout_view(request, total=0, quantity=0, cart_items=None):
         'shipping_charge':shipping_charge,
         'grand_total': grand_total,
         'addresses' :  addresses,
+        'available_coupons' : available_coupons
         
     }
     return render(request,'user_home/checkout.html', context)
@@ -132,6 +145,8 @@ def place_order_view(request):
     if total>=500:
         shipping_charge=0
     grand_total = total + shipping_charge
+    coupon = None
+    discount = None
 
     if 'coupon_code' in request.session:
         coupon_code = request.session.get('coupon_code')
@@ -139,7 +154,6 @@ def place_order_view(request):
     if 'discount' in request.session:
         discount = Decimal(str(request.session.get('discount', '0')))
    
-    
     print(coupon, discount)
     if coupon and discount:
         grand_total = grand_total - discount
@@ -425,4 +439,20 @@ def user_cancel_order_view(request, order_number):
         return redirect('user_orders')
     return render(request, 'user_home/confirm_cancel_order.html',{'order':order})
 
+#view function for downloading pdf of invoices
+@login_required(login_url='login_page')
+def download_invoice_pdf_view(request, order_id):
+    # Fetch the order based on the provided order ID
+    order = get_object_or_404(Order, id=order_id)
 
+    # Render the invoice HTML template as a string
+    html_content = render_to_string('user_home/order_invoice_pdf_download.html', {'order': order})
+
+    # Generate the PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{order.order_number}.pdf"'
+
+    # Convert HTML to PDF using WeasyPrint
+    HTML(string=html_content, base_url=request.build_absolute_uri()).write_pdf(response)
+
+    return response

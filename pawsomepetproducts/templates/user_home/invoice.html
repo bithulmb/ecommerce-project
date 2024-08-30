@@ -24,6 +24,7 @@
             <div class="card-body">
                
                 <div class="col"><header class=""><h2 class=" text-center ">Order Invoice</h2></header></div> 
+                
 <div class="container" style="margin: 0 auto;padding: 50px;background: #f1f1f1;margin-top: 50px;margin-bottom: 50px;">
     <div class="row invoice row-printable">
         <div class="col-md-12">
@@ -125,8 +126,8 @@
     </div>
     </div>
     <div class="text-center">
-                    
-        <a href="{% url 'user_orders' %}" class="btn btn-secondary">Back To Orders</a>
+        <div><a href="{% url 'download_invoice_pdf' order.id %}" class="link-primary ">Download PDF</a>  </div>  
+        <a href="{% url 'user_orders' %}" class="btn btn-secondary mt-3">Back To Orders</a>
     
 </div>
 

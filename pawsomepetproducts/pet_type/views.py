@@ -18,7 +18,7 @@ def admin_pet_type_view(request):
     if query:
         pet_types=PetType.objects.filter(name__icontains=query)
     else:
-        pet_types=PetType.objects.all()
+        pet_types=PetType.objects.all().order_by('id')
     
     #for pagination
     paginator = Paginator(pet_types, 8) 

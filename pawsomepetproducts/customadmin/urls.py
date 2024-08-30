@@ -5,6 +5,7 @@ from category import views as category_views
 from pet_type import views as pet_type_views
 from product import views as product_views
 from orders import views as order_views
+from coupons import views as coupon_views
 
 
 #url patterns in the admin panel
@@ -40,6 +41,14 @@ urlpatterns = [
     # order related urls from order app
     path('admin-panel/orders/', order_views.admin_orders_view, name='admin_orders'),
     path('admin-panel/orders/<int:order_id>/', order_views.admin_order_details_view, name='admin_order_details'),
+
+    #coupon related urls from coupon app
+    path('admin-panel/coupons/', coupon_views.admin_coupons_view, name='admin_coupons'),
+    path('admin-panel/coupons/add', coupon_views.admin_add_coupon_view, name='admin_add_coupon'),
+    path('admin-panel/coupons/<int:coupon_id>/edit', coupon_views.admin_edit_coupon_view, name='admin_edit_coupon'),
+
+
+
 ]
 
 

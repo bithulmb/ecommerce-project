@@ -68,7 +68,7 @@
                 </div>
                 <div class="row mt-3">
                       <div class="col-md-3">
-                        <form method="POST" >
+                        <!-- <form method="POST" >
                             {% csrf_token %}
                             <div class="form-group">
                                 <label for="status"> <h6>Change Order Status:</h6></label>
@@ -82,7 +82,27 @@
                             </div>
                             
                            
-                        </form>
+                        </form> -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                              <label for="status">
+                                <h6>Change Order Status:</h6>
+                              </label>
+                              <select name="status" id="status" class="form-control"
+                                {% if order.status == 'Returned' or order.status == 'Cancelled' or order.status == 'Delivered' %}disabled{% endif %}>
+                                {% for key, value in order.STATUS %}
+                                  {% if order.status == 'Processing' and key in 'Processing,Shipped' or order.status == 'Shipped' and key in 'Shipped,Delivered' %}
+                                    <option value="{{ key }}" {% if order.status == key %}selected{% endif %}>{{ value }}</option>
+                                  {% endif %}
+                                {% endfor %}
+                              </select>
+                              <button class="mt-2 btn btn-primary" type="submit"
+                                {% if order.status == 'Returned' or order.status == 'Cancelled' or order.status == 'Delivered' %}disabled{% endif %}>
+                                Update
+                              </button>
+                            </div>
+                          </form>
 
                       </div> 
                     

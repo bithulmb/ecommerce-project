@@ -1,0 +1,49 @@
+{% extends 'admin/adminbase.html' %}
+
+{% block css_linking %}
+
+<!-- Include Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Include Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+{% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+
+
+<section class="content-main">
+
+<div class="card mx-auto" style="max-width:520px; margin-top:40px;">
+    <article class="card-body">
+      <header class=""><h2 class=" text-center ">Coupon</h2></header>
+
+      <form method="POST" >
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button class="btn btn-primary" type="submit">Edit</button>
+        <a class="btn btn-secondary" href="{% url 'admin_coupons' %}">Back</a>
+      </form>
+      
+      
+     
+      </article><!-- card-body.// -->
+  </div> <!-- card .// -->
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        flatpickr("#id_valid_from", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+        });
+        flatpickr("#id_valid_to", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+        });
+    });
+</script>
+
+{% endblock %}
