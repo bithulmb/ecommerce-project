@@ -293,18 +293,27 @@
             <aside class="col-md-4">
                 <article class="card mt-4">
                     <div class="card-body">
-                        <p class="text-center mb-3">
+                        <!-- <p class="text-center mb-3">
                             <img src="{% static 'user/images/misc/payments.png' %}" height="26">
-                        </p>
+                        </p> -->
                         <header><h4 class="card-title my-4">Select Payment Method</h4></header>
+                        {% if grand_total <= 1000 or discounted_total <= 1000 %}
                         <div class="m-3">
                             <input type="radio" name="payment_method" id="cash_on_delivery" value="cash_on_delivery" required>
                             <label for="cash_on_delivery">Cash On Delivery</label><br>
                         </div>
+                        {% endif %}
                         <div class="m-3">
                             <input type="radio" name="payment_method" id="online" value="online" required>
                             <label for="online">Online</label><br>
                         </div>
+                        {% if wallet.balance >= 0 %}
+
+                        <div class="m-3">
+                            <input type="radio" name="payment_method" id="wallet" value="wallet" required>
+                            <label for="wallet">Wallet ( Balance : {{wallet.balance}})</label><br>
+                        </div>
+                        {% endif %}
                         <button type="submit" form="order-form" class="btn btn-primary btn-block">Continue</button>
                     </form>
                     </div>

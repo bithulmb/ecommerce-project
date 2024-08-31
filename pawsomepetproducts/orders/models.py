@@ -30,7 +30,9 @@ class Order(models.Model):
     )
     PAYMENT_METHODS=(
         ('Online','Online'),
-        ('Cash On Delivery', 'Cash On Delivery')
+        ('Cash On Delivery', 'Cash On Delivery'),
+        ('Wallet', 'Wallet'),
+        ('Wallet with Online Payment', 'Wallet with Online Payment'),
     )
     user            = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
     payment_method  = models.CharField(max_length=30, choices=PAYMENT_METHODS, null=True)

@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 from accounts.decorators import superuser_required
 from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
 from .forms import AddCouponForm
+from wallet.models import Wallet
 
 
 
@@ -45,6 +46,7 @@ def apply_coupon_view(request):
     except ObjectDoesNotExist:
         raise Http404
     addresses=Address.objects.filter(user=request.user)
+    wallet, created = Wallet.objects.get_or_create(user=request.user)
     context={
         'total':total,
         'quantity':quantity,
@@ -52,6 +54,7 @@ def apply_coupon_view(request):
         'shipping_charge':shipping_charge,
         'grand_total': grand_total,
         'addresses' :  addresses,
+        'wallet' : wallet,
         
     }
     url = request.META.get('HTTP_REFERER')

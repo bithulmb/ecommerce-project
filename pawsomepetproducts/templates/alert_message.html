@@ -1,9 +1,24 @@
 <!-- Alert box for displaying messages -->
-{% if messages %}
+<!-- {% if messages %}
 <div class="alert alert-info alert-dismissible fade show text-center my-3" role="alert">
 {% for message in messages %}
     {{message}}
 {% endfor %}                      
 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
+{% endif %} -->
+{% if messages %}
+    {% for message in messages %}
+        {% if "error" in message.tags %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% elif "success" in message.tags %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+    {% endfor %}
 {% endif %}

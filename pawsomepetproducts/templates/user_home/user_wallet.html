@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y bg">
+
+    <div class="container">
+        <div class="row">
+            {% include 'user_home/user_dashboard.html' %}
+        <main class="col-md-9">
+            <article class="card" >
+            <div class="card-body">
+                <div class="container mt-4">
+                    <h2 class="mb-4">My Wallet</h2>
+                
+                    <!-- Display Wallet Balance -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Wallet Balance</h5>
+                            <p class="card-text">
+                                <strong>Balance:</strong> ₹ {{ wallet.balance }}
+                            </p>
+                        </div>
+                    </div>
+                
+                    <!-- Transaction History -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Transaction History</h5>
+                
+                            {% if transactions %}
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Transaction Type</th>
+                                        <th scope="col">Amount</th>
+                                        <th scope="col">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in transactions %}
+                                    <tr>
+                                        <td>{{ transaction.created_at|date:"d M Y, H:i" }}</td>
+                                        <td>{{ transaction.transaction_type }}</td>
+                                        <td class="{% if transaction.transaction_type == 'CREDIT' %}text-success{% else %}text-danger{% endif %}">
+                                            ₹ {{ transaction.amount }}
+                                        </td>
+                                        <td>{{ transaction.description }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p class="text-muted">No transactions found in your wallet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- card-body .// -->
+            </article> <!-- order-group.// --> 
+        </main>
+    </div> <!-- row.// -->
+    </div>
+    
+    
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+    
+    {% endblock %}

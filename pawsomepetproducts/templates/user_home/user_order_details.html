@@ -16,14 +16,7 @@
                 
                    
                  <!-- Alert box for displaying messages -->
-                 {% if messages %}
-                 <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
-                 {% for message in messages %}
-                     {{message}}
-                 {% endfor %}                      
-                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                 </div>
-                 {% endif %}
+                {% include 'alert_message.html' %}
                 
                 <div class="row mt-3 "> 
                 <div class="col-md-9">
@@ -34,6 +27,7 @@
                     <p>Payment_method: <strong>{{order.payment_method}}</strong></p>
                  
                 </div>
+                
                 <div class="col-md-3">
                     <div>
                        
@@ -41,6 +35,10 @@
 
                         <a href="{% url 'user_cancel_order' order.order_number %}" class="btn btn-danger">Cancel Order</a>
                         {% endif %}
+                        
+                        {% if order.status == 'Delivered' %}
+                        <a href="{% url 'user_return_order' order.order_number %}" class="btn btn-danger">Return Order</a>
+                        {% endif %}    
                     </div>
                    
                 </div>
@@ -56,6 +54,7 @@
                          - {{ order.address.pincode }},
                         Contact - {{ order.address.contact_number }}</strong>
                     </p>
+                    <div class="text-right"> <a href="{% url 'view_invoice' order.id %}" class="btn btn-info btn-sm ">View/Download Invoice</a></div>
                     <h3> Order Items:</h3>
                 </div>
                 <table class="table">

@@ -22,6 +22,8 @@ from coupons.models import Coupon
 from decimal import Decimal
 from django.template.loader import render_to_string
 from weasyprint import HTML
+from wallet.models import Wallet, WalletTransaction
+from django.db import transaction
 
 client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
 
@@ -100,6 +102,7 @@ def checkout_view(request, total=0, quantity=0, cart_items=None):
         pass
     addresses=Address.objects.filter(user=request.user)
     available_coupons =  Coupon.objects.filter(active = True)
+    wallet, created = Wallet.objects.get_or_create(user=request.user)
 
     #clearing the coupon code and discount in session
     if 'coupon_code' in request.session:
@@ -114,7 +117,8 @@ def checkout_view(request, total=0, quantity=0, cart_items=None):
         'shipping_charge':shipping_charge,
         'grand_total': grand_total,
         'addresses' :  addresses,
-        'available_coupons' : available_coupons
+        'available_coupons' : available_coupons,
+        'wallet' : wallet,
         
     }
     return render(request,'user_home/checkout.html', context)
@@ -125,7 +129,6 @@ def checkout_view(request, total=0, quantity=0, cart_items=None):
 def place_order_view(request):
     
     current_user=request.user
-
     
     cart_items = CartItem.objects.filter(user=current_user)
     cart_count = cart_items.count()
@@ -154,84 +157,95 @@ def place_order_view(request):
     if 'discount' in request.session:
         discount = Decimal(str(request.session.get('discount', '0')))
    
-    print(coupon, discount)
+   
     if coupon and discount:
         grand_total = grand_total - discount
 
-    print(grand_total)
+    
     if request.method =='POST':
         address_id = request.POST.get('address_id')
         payment_method = request.POST.get('payment_method')
 
         #if the user has selected cash on delivery option in payment method
         if payment_method=="cash_on_delivery":
-            address = Address.objects.get(id=address_id)
-            
-            #creating an order instance and saving
-            order_instance = Order()
-            order_instance.user=current_user
-            order_instance.address=address
-            order_instance.order_total=total
-            order_instance.shipping_charge = shipping_charge
-            order_instance.total_amount=grand_total
-            order_instance.payment_method="Cash On Delivery" 
-            
-            if coupon and discount:
-                order_instance.coupon = coupon
-                order_instance.discount_amount = discount
-                
-            order_instance.save()
-            
-            # Generate order number
-            yr = int(datetime.date.today().strftime("%Y"))
-            dt = int(datetime.date.today().strftime("%d"))
-            mt = int(datetime.date.today().strftime("%m"))
-            d = datetime.date(yr, mt, dt)
-            current_date = d.strftime("%y%m%d")
-            order_number = current_date + str(order_instance.id)
-            order_instance.order_number = order_number
-            order_instance.save()
 
-            #creating an instance of payment and saving
-            payment_instance = Payment(
-                    user=current_user,
-                    payment_id=order_number,
-                    payment_method="Cash On Delivery",
-                    amount_paid=grand_total,
-                    status="Pending",
-                )
-            payment_instance.save()
+            try:
+                with transaction.atomic():
+                    address = Address.objects.get(id=address_id)
             
-            #saving the payment method to order instance
-            order_instance.payment=payment_instance
-            order_instance.is_ordered=True
-            order_instance.save()
+                    #creating an order instance and saving
+                    order_instance = Order()
+                    order_instance.user=current_user
+                    order_instance.address=address
+                    order_instance.order_total=total
+                    order_instance.shipping_charge = shipping_charge
+                    order_instance.total_amount=grand_total
+                    order_instance.payment_method="Cash On Delivery" 
+                    
+                    if coupon and discount:
+                        order_instance.coupon = coupon
+                        order_instance.discount_amount = discount
+                        
+                    order_instance.save()
+                    
+                    # Generate order number
+                    yr = int(datetime.date.today().strftime("%Y"))
+                    dt = int(datetime.date.today().strftime("%d"))
+                    mt = int(datetime.date.today().strftime("%m"))
+                    d = datetime.date(yr, mt, dt)
+                    current_date = d.strftime("%y%m%d")
+                    order_number = current_date + str(order_instance.id)
+                    order_instance.order_number = order_number
+                    order_instance.save()
+
+                    #creating an instance of payment and saving
+                    payment_instance = Payment(
+                            user=current_user,
+                            payment_id=order_number,
+                            payment_method="Cash On Delivery",
+                            amount_paid=grand_total,
+                            status="Pending",
+                        )
+                    payment_instance.save()
+                    
+                    #saving the payment method to order instance
+                    order_instance.payment=payment_instance
+                    order_instance.is_ordered=True
+                    order_instance.save()
+                    
+                    #move the cart items to order product table    
+                    for item in cart_items:
+                        order_product_instance=OrderProduct()
+                        order_product_instance.order=order_instance
+                        order_product_instance.payment=payment_instance
+                        order_product_instance.product=item.variant
+                        order_product_instance.quantity=item.quantity
+                        order_product_instance.product_price=item.variant.price
+                        order_product_instance.save() 
+
+                    #reduce the number of stock of product
+                        product=Product_Variant.objects.get(id=item.variant.id)
+                        product.stock -= item.quantity
+                        product.save()
+
+                    #clearing the cart of the user
+                    cart_items.delete()
+
+                    #clearing the coupon code and discount in session
+                    if 'coupon_code' in request.session:
+                        del request.session['coupon_code']
+                    if 'discount' in request.session:
+                        del request.session['discount']
+
+                    return redirect('order_success')
+
+
+            except Exception as e:
+                messages.error(request, 'An error occurred while ordering. Please try again.')
+                return redirect('checkout')
+        
+
             
-            #move the cart items to order product table    
-            for item in cart_items:
-                order_product_instance=OrderProduct()
-                order_product_instance.order=order_instance
-                order_product_instance.payment=payment_instance
-                order_product_instance.product=item.variant
-                order_product_instance.quantity=item.quantity
-                order_product_instance.product_price=item.variant.price
-                order_product_instance.save() 
-
-            #reduce the number of stock of product
-                product=Product_Variant.objects.get(id=item.variant.id)
-                product.stock -= item.quantity
-                product.save()
-
-            #clearing the cart of the user
-            cart_items.delete()
-
-            #clearing the coupon code and discount in session
-            if 'coupon_code' in request.session:
-                del request.session['coupon_code']
-            if 'discount' in request.session:
-                del request.session['discount']
-
-            return redirect('order_success')
         
         if payment_method=="online":
             # authorize razorpay client with API Keys.
@@ -291,6 +305,261 @@ def place_order_view(request):
             request.session['order_id'] = order_instance.id
 
             return render(request, 'user_home/payment.html', context=context)
+        
+        if payment_method == 'wallet':
+
+            wallet = Wallet.objects.get(user=request.user)
+            
+            if wallet.balance >= grand_total:
+                try:
+                    with transaction.atomic():
+
+                        #creating an order instance and saving
+                        order_instance = Order()
+                        order_instance.user = current_user
+                        order_instance.address = Address.objects.get(id=address_id)
+                        order_instance.order_total=total
+                        order_instance.shipping_charge = shipping_charge
+                        order_instance.total_amount = grand_total
+                        order_instance.payment_method = "Wallet"             
+                        if coupon and discount:
+                            order_instance.coupon = coupon
+                            order_instance.discount_amount = discount
+                        order_instance.save()
+
+                        # Generate order number
+                        yr = int(datetime.date.today().strftime("%Y"))
+                        dt = int(datetime.date.today().strftime("%d"))
+                        mt = int(datetime.date.today().strftime("%m"))
+                        d = datetime.date(yr, mt, dt)
+                        current_date = d.strftime("%y%m%d")
+                        order_number = current_date + str(order_instance.id)
+                        order_instance.order_number = order_number
+                        order_instance.save()
+
+                        #creating an instance of payment and saving
+                        payment_instance = Payment(
+                                user=current_user,
+                                payment_id=order_number,
+                                payment_method="Wallet",
+                                amount_paid=grand_total,
+                                status="Completed",
+                            )
+                        payment_instance.save()
+                        
+                        #subtracting the balance of wallet and creating a transaction
+                        wallet.balance -= grand_total
+                        wallet.save()
+                        WalletTransaction.objects.create(
+                                wallet=wallet,
+                                transaction_type='DEBIT',
+                                amount=grand_total,
+                                description=f'Paid for order {order_number}'
+                            )
+
+
+
+
+                        #saving the payment method to order instance
+                        order_instance.payment=payment_instance
+                        order_instance.is_ordered=True
+                        order_instance.save()
+                        
+                        #move the cart items to order product table    
+                        for item in cart_items:
+                            order_product_instance=OrderProduct()
+                            order_product_instance.order=order_instance
+                            order_product_instance.payment=payment_instance
+                            order_product_instance.product=item.variant
+                            order_product_instance.quantity=item.quantity
+                            order_product_instance.product_price=item.variant.price
+                            order_product_instance.save() 
+
+                        #reduce the number of stock of product
+                            product=Product_Variant.objects.get(id=item.variant.id)
+                            product.stock -= item.quantity
+                            product.save()
+
+                        #clearing the cart of the user
+                        cart_items.delete()
+
+                        #clearing the coupon code and discount in session
+                        if 'coupon_code' in request.session:
+                            del request.session['coupon_code']
+                        if 'discount' in request.session:
+                            del request.session['discount']
+
+                        return redirect('order_success')
+            
+                except Exception as e:
+                    messages.error(request, 'An error occurred while ordering. Please try again.')
+                    return redirect('checkout')
+           
+                
+            if wallet.balance>0:                                                                       
+                #creating an order instance and saving
+                order_instance = Order()
+                order_instance.user = current_user
+                order_instance.address = Address.objects.get(id=address_id)
+                order_instance.order_total=total
+                order_instance.shipping_charge = shipping_charge
+                order_instance.total_amount = grand_total
+                order_instance.payment_method = "Wallet with Online Payment"             
+                if coupon and discount:
+                    order_instance.coupon = coupon
+                    order_instance.discount_amount = discount
+                order_instance.save()
+
+                # Generate order number
+                yr = int(datetime.date.today().strftime("%Y"))
+                dt = int(datetime.date.today().strftime("%d"))
+                mt = int(datetime.date.today().strftime("%m"))
+                d = datetime.date(yr, mt, dt)
+                current_date = d.strftime("%y%m%d")
+                order_number = current_date + str(order_instance.id)
+                order_instance.order_number = order_number
+                order_instance.save()
+               
+                wallet_payment_amount = wallet.balance
+                online_payment_amount = grand_total - wallet_payment_amount
+                # authorize razorpay client with API Keys.
+                client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
+                amount  = int(online_payment_amount * 100) #for converting amount to paisa for collection
+               
+                data = { 
+                    "amount": amount, 
+                    "currency": "INR", 
+                    "receipt": order_number,
+                    "payment_capture": "1",
+                 }
+                
+                #create a razor pay order
+                razorpay_order=client.order.create(data = data)
+                
+                order_id=razorpay_order['id']
+                order_status=razorpay_order['status']
+                context={}
+
+
+                if order_status == 'created':
+
+                    context={
+                        'order_id':order_id,
+                        'amount': amount,
+                        'user': current_user,
+                        'wallet_payment_amount' : wallet_payment_amount,
+                        'online_payment_amount' : online_payment_amount
+
+                        
+                    }
+                
+                # Store the Razorpay order ID  and orderin session
+                request.session['razorpay_order_id'] = razorpay_order['id']
+                request.session['order_id'] = order_instance.id
+                request.session['wallet_payment_amount'] = float(wallet_payment_amount)
+                
+                return render(request, 'user_home/payment_wallet.html', context=context)
+
+
+
+
+#view function for confirming the status of payment after selecting wallet and online payment
+@csrf_exempt
+def wallet_payment_status (request) :
+    if request.method == "POST":
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+
+        params_dict = {
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        }
+
+        try:
+            with transaction.atomic():
+
+                client.utility.verify_payment_signature(params_dict)
+                
+                # payment successful, save payment details
+                order_id = request.session.get('order_id')
+                order_instance = Order.objects.get(id=order_id)
+                
+                #creating an instance of payment and saving
+                payment_instance = Payment(
+                    user=request.user,
+                    payment_id=razorpay_payment_id,
+                    payment_method="Online + Wallet",
+                    amount_paid=order_instance.total_amount,
+                    status="Completed",
+                )
+                payment_instance.save()
+                
+                #saving payment instance to order instance
+                order_instance.payment = payment_instance
+                order_instance.is_ordered = True
+                order_instance.save()
+
+                #subtracting the balance of wallet
+                wallet_payment_amount = request.session.get('wallet_payment_amount')
+                wallet=Wallet.objects.get(user=request.user)
+                wallet.balance -= Decimal(str(wallet_payment_amount))
+                wallet.save()
+
+                #creating a wallet transaction
+                WalletTransaction.objects.create(
+                                wallet=wallet,
+                                transaction_type='DEBIT',
+                                amount=wallet_payment_amount,
+                                description=f'Paid for order {order_instance.order_number}'
+                            )
+
+
+
+                
+                # Clear session
+                del request.session['razorpay_order_id']
+                del request.session['order_id']
+                del request.session['wallet_payment_amount']
+
+                #getting the items in cart
+                cart_items = CartItem.objects.filter(user=request.user)
+                
+                #move the cart items to order product table    
+                for item in cart_items:
+                    order_product_instance=OrderProduct()
+                    order_product_instance.order=order_instance
+                    order_product_instance.payment=payment_instance
+                    order_product_instance.product=item.variant
+                    order_product_instance.quantity=item.quantity
+                    order_product_instance.product_price=item.variant.price
+                    order_product_instance.save() 
+
+                #reduce the number of stock of product
+                    product=Product_Variant.objects.get(id=item.variant.id)
+                    product.stock -= item.quantity
+                    product.save()
+
+                #clearing the cart of the user
+                cart_items.delete()
+                #clearing the coupon code and discount in session
+                if 'coupon_code' in request.session:
+                    del request.session['coupon_code']
+                if 'discount' in request.session:
+                    del request.session['discount']
+
+
+
+                return redirect('order_success')
+           
+        except razorpay.errors.SignatureVerificationError:
+            return HttpResponseBadRequest()
+    return HttpResponseBadRequest()
+
+
+
+
 
 #view function for confirming the status of payment
 @csrf_exempt
@@ -432,11 +701,50 @@ def user_order_details_view(request, order_number):
 def user_cancel_order_view(request, order_number):
     order = get_object_or_404(Order, order_number=order_number, user=request.user)
     
+    if order.status in ['Cancelled', 'Delivered', 'Returned']:
+        messages.error(request,"The order cannot be cancelled in this stage")
+        return redirect('user_order_details', order.order_number)
+    
+    
+    
     if request.method == 'POST':
-        order.status = 'Cancelled'
-        order.save()
-        messages.success(request, 'Cancellation Of Order Succesful')
-        return redirect('user_orders')
+
+        if order.payment_method == 'Online' or order.payment_method == 'Wallet':
+            refund_amount = order.total_amount
+
+            try:
+                
+                with transaction.atomic():
+                    
+                    order.status = 'Cancelled'
+                    order.save()
+                    
+                    wallet, created = Wallet.objects.get_or_create(user=request.user)
+                    
+                    wallet.balance += refund_amount
+                    wallet.save()
+
+                    WalletTransaction.objects.create(
+                        wallet=wallet,
+                        transaction_type='CREDIT',
+                        amount=refund_amount,
+                        description=f'Refund for cancelled order {order.order_number}'
+                    )
+                    
+
+                    messages.success(request, 'Cancellation of order successful and amount refunded to your wallet.')
+
+
+            except Exception as e:
+                messages.error(request, 'An error occurred while cancelling your order. Please try again.')
+        
+        else:
+            order.status = 'Cancelled'
+            order.save()
+            messages.success(request, 'Cancellation of order successful.')
+
+        return redirect('user_order_details', order.order_number)
+    
     return render(request, 'user_home/confirm_cancel_order.html',{'order':order})
 
 #view function for downloading pdf of invoices
@@ -456,3 +764,48 @@ def download_invoice_pdf_view(request, order_id):
     HTML(string=html_content, base_url=request.build_absolute_uri()).write_pdf(response)
 
     return response
+
+
+
+#view function for returning an order
+@login_required(login_url='login_page')
+@never_cache
+def user_return_order_view(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+    
+    if order.status in ['Processing', 'Shipped', 'Cancelled', 'Returned']:
+        messages.error(request,"The order cannot be returned in this stage")
+        return redirect('user_order_details', order.order_number)
+    
+    if request.method == 'POST':
+
+        refund_amount = order.total_amount
+
+        try:
+            
+            with transaction.atomic():              
+                
+                wallet, created = Wallet.objects.get_or_create(user=request.user)
+                
+                wallet.balance += refund_amount
+                wallet.save()
+
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    transaction_type='CREDIT',
+                    amount=refund_amount,
+                    description=f'Refund for returned order {order.order_number}'
+                )
+                
+                order.status = 'Returned'
+                order.save()
+
+                messages.success(request, 'Order Return Succesful and amount refunded to your wallet.')
+
+
+        except Exception as e:
+            messages.error(request, 'An error occurred while returning your order. Please try again.')
+
+        return redirect('user_order_details', order.order_number)
+    
+    return render(request, 'user_home/confirm_return_order.html',{'order':order})

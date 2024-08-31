@@ -7,7 +7,7 @@ from orders import views as order_views
 from django.contrib.auth import views as auth_views
 from wishlist import views as wishlist_views
 from coupons import views as coupon_views
-
+from wallet import views as wallet_views
 
 
 urlpatterns = [
@@ -34,7 +34,7 @@ urlpatterns = [
 
 
 
-            #user profile section
+    #user profile section
     path('user/profile/', account_views.user_profile_view, name='user_profile'),
     path('user/change-password/',account_views.user_change_password_view, name='change_password'),
     path('user/addresses/',account_views.user_addresses_view,name='user_addresses'),
@@ -69,9 +69,12 @@ urlpatterns = [
     path('user/orders/', order_views.user_orders_view, name="user_orders"),
     path('user/orders/<str:order_number>/', order_views.user_order_details_view, name="user_order_details"),
     path('user/orders/<str:order_number>/cancel', order_views.user_cancel_order_view, name="user_cancel_order"),
-    #razor pay urls
-    path('user/payment/status', order_views.payment_status, name="payment_status"),
-    #views from coupon app
+    path('user/orders/<str:order_number>/return', order_views.user_return_order_view, name="user_return_order"),
+    
+    path('user/payment/status', order_views.payment_status, name="payment_status"),#razor pay payment url
+    path('user/wallet_payment/status', order_views.wallet_payment_status, name="wallet_payment_status"),#razor pay payment url for wallet payment also.
+   
+   #views from coupon app
     path('orders/apply-coupon/', coupon_views.apply_coupon_view, name='apply_coupon'),
     path('orders/remove-coupon/', coupon_views.remove_coupon_view, name='remove_coupon'),
     
@@ -80,6 +83,9 @@ urlpatterns = [
     path('wishlist/', wishlist_views.wishlist_view, name='wishlist_page'),
     path('wishlist/add/<int:variant_id>', wishlist_views.add_to_wishlist_view, name='add_to_wishlist'),
     path('wishlist/remove/<int:variant_id>', wishlist_views.remove_from_wishlist_view, name='remove_from_wishlist'),
+
+    #views from wallet app
+    path('user/wallet/', wallet_views.user_wallet_view, name='user_wallet'),
     
     
 ]
