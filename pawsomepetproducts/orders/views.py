@@ -86,17 +86,19 @@ def admin_order_details_view(request, order_id):
 @login_required(login_url='login_page')
 @never_cache
 def checkout_view(request, total=0, quantity=0, cart_items=None):
-    shipping_charge=100
-    grand_total=0
+    shipping_charge = 100
+    grand_total = 0
+    offer_discount = 0
     try:
         cart_items=CartItem.objects.filter(user=request.user, is_active=True)
         for cart_item in cart_items:
             total += (cart_item.variant.price * cart_item.quantity)
             quantity += cart_item.quantity
+            offer_discount += (cart_item.variant.discount_amount() * cart_item.quantity)
         
         if total>=500:
             shipping_charge=0
-        grand_total = total + shipping_charge
+        grand_total = total + shipping_charge - offer_discount
         
     except ObjectDoesNotExist:
         pass
@@ -119,6 +121,8 @@ def checkout_view(request, total=0, quantity=0, cart_items=None):
         'addresses' :  addresses,
         'available_coupons' : available_coupons,
         'wallet' : wallet,
+        'offer_discount' : offer_discount,  
+
         
     }
     return render(request,'user_home/checkout.html', context)
@@ -141,13 +145,15 @@ def place_order_view(request):
     total=0
     shipping_charge=100
     grand_total=0
+    offer_discount = 0
     for cart_item in cart_items:
             total += (cart_item.variant.price * cart_item.quantity)
             quantity += cart_item.quantity
+            offer_discount += (cart_item.variant.discount_amount() * cart_item.quantity)
         
     if total>=500:
         shipping_charge=0
-    grand_total = total + shipping_charge
+    grand_total = total + shipping_charge - offer_discount
     coupon = None
     discount = None
 
@@ -178,6 +184,7 @@ def place_order_view(request):
                     order_instance.user=current_user
                     order_instance.address=address
                     order_instance.order_total=total
+                    order_instance.offer_amount = offer_discount
                     order_instance.shipping_charge = shipping_charge
                     order_instance.total_amount=grand_total
                     order_instance.payment_method="Cash On Delivery" 
@@ -257,6 +264,7 @@ def place_order_view(request):
             order_instance.user = current_user
             order_instance.address = Address.objects.get(id=address_id)
             order_instance.order_total=total
+            order_instance.offer_amount = offer_discount
             order_instance.shipping_charge = shipping_charge
             order_instance.total_amount = grand_total
             order_instance.payment_method = "Online"             
@@ -319,6 +327,7 @@ def place_order_view(request):
                         order_instance.user = current_user
                         order_instance.address = Address.objects.get(id=address_id)
                         order_instance.order_total=total
+                        order_instance.offer_amount = offer_discount
                         order_instance.shipping_charge = shipping_charge
                         order_instance.total_amount = grand_total
                         order_instance.payment_method = "Wallet"             
@@ -402,6 +411,7 @@ def place_order_view(request):
                 order_instance.user = current_user
                 order_instance.address = Address.objects.get(id=address_id)
                 order_instance.order_total=total
+                order_instance.offer_amount = offer_discount
                 order_instance.shipping_charge = shipping_charge
                 order_instance.total_amount = grand_total
                 order_instance.payment_method = "Wallet with Online Payment"             

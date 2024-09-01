@@ -6,6 +6,7 @@ from pet_type import views as pet_type_views
 from product import views as product_views
 from orders import views as order_views
 from coupons import views as coupon_views
+from offers import views as offers_views
 
 
 #url patterns in the admin panel
@@ -47,15 +48,19 @@ urlpatterns = [
     path('admin-panel/coupons/add', coupon_views.admin_add_coupon_view, name='admin_add_coupon'),
     path('admin-panel/coupons/<int:coupon_id>/edit', coupon_views.admin_edit_coupon_view, name='admin_edit_coupon'),
 
+    #offer related urls from the offers app
+    path('admin-panel/offers/', offers_views.admin_offers_view, name='admin_offers'),
+    path('admin-panel/offers/product/', offers_views.admin_product_offers_view, name='admin_product_offers'),
+    path('admin-panel/offers/product/add', offers_views.admin_add_product_offer_view, name='admin_add_product_offer'),
+    path('admin-panel/offers/product/<int:product_offer_id>/edit', offers_views.admin_edit_product_offer_view, name='admin_edit_product_offer'),
+    path('admin-panel/offers/category', offers_views.admin_category_offers_view, name='admin_category_offers'),
+    path('admin-panel/offers/category/add', offers_views.admin_add_category_offer_view, name='admin_add_category_offer'),
+    path('admin-panel/offers/category/<int:category_offer_id>/edit', offers_views.admin_edit_category_offer_view, name='admin_edit_category_offer'),
 
 
 ]
 
 
 
-    # path('admin-panel/users/', include('accounts.urls')),
-    # path('admin-panel/category/', include('category.urls')),
-    # path('admin-panel/pet-type/', include('pet_type.urls')),
-    # path('admin-panel/products/',include('product.urls'))
 
     

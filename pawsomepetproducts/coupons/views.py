@@ -28,7 +28,7 @@ from wallet.models import Wallet
 @require_POST
 def apply_coupon_view(request):
     
-    total,quantity,grand_total=0,0,0
+    total,quantity,grand_total,offer_discount=0,0,0,0
     discounted_total=None
     cart_items=None
     try:
@@ -36,12 +36,13 @@ def apply_coupon_view(request):
         for cart_item in cart_items:
             total += (cart_item.variant.price * cart_item.quantity)
             quantity += cart_item.quantity
+            offer_discount += (cart_item.variant.discount_amount() * cart_item.quantity)
         
         if total>=500:
             shipping_charge=0
         else:
             shipping_charge = 100
-        grand_total = total + shipping_charge
+        grand_total = total + shipping_charge - offer_discount
         
     except ObjectDoesNotExist:
         raise Http404
@@ -55,6 +56,7 @@ def apply_coupon_view(request):
         'grand_total': grand_total,
         'addresses' :  addresses,
         'wallet' : wallet,
+        'offer_discount' : offer_discount,  
         
     }
     url = request.META.get('HTTP_REFERER')

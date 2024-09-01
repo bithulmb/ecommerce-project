@@ -155,10 +155,19 @@
                             </div> <!-- row.// -->
                             <hr>
                         {% endif %}
-                        
-                        <div class="mb-3"> 
+                        <div class="mb-3">
+                            {% if offer_price < product_variant.price %}
+                                <var class="price h4 me-2">₹ {{ offer_price }}</var> 
+                                <var class="price h4 text-muted text-decoration-line-through">₹ {{ product_variant.price }}</var>
+                               
+                                {% else %}
+                                <var class="price h4 ">₹ {{ product_variant.price }}</var>   
+                                {% endif %}
+                        </div>
+                        <!-- <div class="mb-3"> 
+                            
                             <var class="price h4">₹ {{ product_variant.price }}</var> 
-                        </div> 
+                        </div>  -->
                         {% if product_variant.stock > 0 %}
                             
                         <a href="{% url 'add_to_cart' product_variant.id %}" class="btn btn-primary"> 

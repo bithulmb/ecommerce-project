@@ -103,6 +103,7 @@ def delete_cart_item_view(request, variant_id):
 def cart_view(request, total=0, quantity=0, cart_items=None):
     shipping_charge=100
     grand_total=0
+    offer_discount = 0
     try:
           #if user is authenticated cart items are filetered based on user id else based on last cartid
         if request.user.is_authenticated:
@@ -114,10 +115,12 @@ def cart_view(request, total=0, quantity=0, cart_items=None):
         for cart_item in cart_items:
             total += (cart_item.variant.price * cart_item.quantity)
             quantity += cart_item.quantity
+            offer_discount += (cart_item.variant.discount_amount() * cart_item.quantity)
+            
         
         if total>=500:
             shipping_charge=0
-        grand_total = total + shipping_charge      
+        grand_total = total + shipping_charge - offer_discount     
     except ObjectDoesNotExist:
         pass
     context={
@@ -125,7 +128,8 @@ def cart_view(request, total=0, quantity=0, cart_items=None):
         'quantity':quantity,
         'cart_items' :cart_items,
         'shipping_charge':shipping_charge,
-        'grand_total': grand_total,      
+        'grand_total': grand_total, 
+        'offer_discount' : offer_discount,   
          }
     return render(request,'user_home/cart.html',context)
 

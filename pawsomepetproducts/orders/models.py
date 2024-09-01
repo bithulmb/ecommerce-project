@@ -50,6 +50,7 @@ class Order(models.Model):
     discount_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     order_total     = models.DecimalField(max_digits=8, decimal_places=2, null=True)
     shipping_charge = models.DecimalField(max_digits=8, decimal_places=2, null = True)
+    offer_amount    = models.DecimalField(max_digits=8,decimal_places=2, default = 0.00)
     
     def __str__(self):
         return self.order_number

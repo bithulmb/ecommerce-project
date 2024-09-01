@@ -250,7 +250,8 @@ def single_product_view(request, pk):
         'in_cart'   : in_cart,
         'in_wishlist':in_wishlist,
         'product_ordered' : product_ordered,
-        'reviews'   :reviews
+        'reviews'   :reviews,
+        'offer_price' : product_variant.get_offer_price()
     }
     return render(request, 'user_home/single_product.html', context)
 

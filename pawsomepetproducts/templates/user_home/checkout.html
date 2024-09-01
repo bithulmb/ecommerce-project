@@ -141,6 +141,10 @@
                             <dd class="text-right">₹ {{total}}</dd>
                         </dl>
                         <dl class="dlist-align">
+                            <dt>Offer applied:</dt>
+                            <dd class="text-right text-success"> ₹ {{offer_discount}}</dd>
+                          </dl>
+                        <dl class="dlist-align">
                             <dt>Shipping Charge:</dt>
                             <dd class="text-right">₹ {{shipping_charge}} </dd>
                         </dl>
@@ -176,9 +180,9 @@
                             <a href="{% url 'remove_coupon' %}" class="btn btn-sm btn-danger">Remove Coupon</a>
                         </div>
                        
-                        <dl class="dlist-align">
-                            <dt>Discount Amount : </dt>
-                            <dd class="text-right">₹ {{discount}}</dd>
+                        <dl class="dlist-align mt-2">
+                            <dt>Coupon Discount : </dt>
+                            <dd class="text-right text-success">₹ {{discount}}</dd>
                         </dl>
                        
                         <dl class="dlist-align mt-4">

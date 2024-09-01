@@ -16,8 +16,16 @@
                     <a href="{% url 'single_product_page' product.id %}" class="title">{{product.product_name.name}} </a>
                     {% endif %}
                     <div class="price-wrap mt-2">
+                        {% if product.get_offer_price < product.price %}
+                        <var class="price  me-2">₹ {{ product.get_offer_price }}</var> 
+                        <var class="price  text-muted text-decoration-line-through">₹ {{ product.price }}</var>
+                       
+                        {% else %}
+                        <var class="price  ">₹ {{ product.price }}</var>   
+                        {% endif %}
+<!-- 
                         <span class="price">₹ {{product.price}}</span>
-                        <!-- <del class="price-old">$1980</del> -->
+                        <del class="price-old">$1980</del> -->
                     </div> <!-- price-wrap.// -->
                 </div>
                 <a href="{% url 'single_product_page' product.id %}" class="btn btn-block btn-success">View Product </a>

@@ -108,6 +108,12 @@
                                                         <th colspan="3" class="text-right">Sub Total:</th>
                                                         <th class="text-center">₹ {{ order.order_total }}</th>
                                                     </tr>
+                                                    {% if order.offer_amount > 0 %}
+                                                    <tr>
+                                                    <th colspan="3" class="text-right">Offer Applied:</th>
+                                                    <th class="text-center">₹ {{order.offer_amount}}</th>
+                                                     </tr>
+                                                     {% endif %}
                                                     <tr>
                                                         <th colspan="3" class="text-right">Shipping Charge:</th>
                                                         <th class="text-center">₹ {{ order.shipping_charge }}</th>

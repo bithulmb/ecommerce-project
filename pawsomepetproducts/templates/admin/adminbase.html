@@ -101,6 +101,24 @@
                     </a>
                    
                 </li>
+
+                <!-- <li class="menu-item {% active_link 'admin_offers || admin_edit_offer || admin_add_offer' %}">
+                    <a class="menu-link" href="{% url 'admin_offers' %}"> <i class="icon material-icons md-grade"></i>
+                        <span class="text">Offer Management</span>
+                    </a>
+                   
+                </li> -->
+
+                <li class="menu-item has-submenu {% active_link 'admin_offers || admin_edit_offer || admin_add_offer' %}">
+                    <a class="menu-link" href="#"> <i class="icon material-icons md-grade"></i>
+                        <span class="text">Offer Management</span>
+                    </a>
+                    <div class="submenu">
+                        <a href="{% url 'admin_product_offers' %}">Product Offers</a>
+                        <a href="{% url 'admin_category_offers' %}">Category Offers</a>
+                        
+                    </div>
+                </li>
                 
             
                 <li class="menu-item {% active_link 'admin_sales_report' %}">

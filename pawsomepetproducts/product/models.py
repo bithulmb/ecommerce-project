@@ -6,6 +6,7 @@ from accounts.models import CustomUser
 from django.db.models import Count,Avg
 
 
+
 # Create your models here.
 
 class Product(models.Model):
@@ -44,7 +45,7 @@ class Product_Variant(models.Model):
     def __str__(self) -> str:
         return str(f"{self.product_name.name} {self.size}")
     
-    #function to finout the averafe rating of product
+    #function to findout the average rating of product
     def calculate_average_rating(self):
         reviews = ReviewRating.objects.filter(product_variant=self, status=True).aggregate(average = Avg('rating'))
         return reviews['average'] or 0
@@ -57,9 +58,42 @@ class Product_Variant(models.Model):
             
             count = int(reviews['count'])
         return count
+    
+    #function to calculatte the offer price based on product variant offer
+    def get_offer_price(self):
+        
+        from offers.models import ProductVariantOffer,CategoryOffer #impoerted inside the function to avoid circulat import
 
+        original_price = self.price
+        discount  = 0
+
+        #cheching if any product or category offer associated with the product
+        variant_offer = ProductVariantOffer.objects.filter(product = self , is_active = True).first()
+        category_offer = CategoryOffer.objects.filter(category=self.product_name.category, is_active=True).first()
+        if variant_offer:
+            discount = variant_offer.discount_amount 
+        if category_offer:
+            if category_offer.discount_amount > discount:
+                discount = category_offer.discount_amount 
+            
+            
+        offer_price = original_price - discount
+        return offer_price
+
+        
     
-    
+    def discount_amount(self):
+        discount = 0
+        variant_offer = self.variant_offer.filter(is_active=True).first()
+        category_offer = self.product_name.category.category_offer.filter(is_active = True).first()
+        if variant_offer:
+            discount = variant_offer.discount_amount
+        if category_offer:
+            if category_offer.discount_amount > discount:
+                discount = category_offer.discount_amount
+        
+        return discount
+
 
 
 class Product_Images(models.Model):
