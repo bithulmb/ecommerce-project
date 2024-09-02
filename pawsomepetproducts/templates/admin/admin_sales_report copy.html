@@ -1,0 +1,231 @@
+{% extends 'admin/adminbase.html' %}
+
+{% block content %}
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Sales Report </h2>
+        </div>
+      
+    </div>
+    
+
+    <div class="container">
+       
+        <div class="card">
+            <div class="card-header">
+                <h5>Filter Sales Report</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{% url 'admin_sales_report' %}" onsubmit="return validateDateRange()">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="filter" class="form-label">Filter By:</label>
+                            <select id="filter" name="filter" class="form-select" onchange="toggleDateRange()">
+                                <option value="overall" {% if filter == 'overall' %}selected{% endif %}>Overall</option>
+                                <option value="daily" {% if filter == 'daily' %}selected{% endif %}>Daily</option>
+                                <option value="weekly" {% if filter == 'weekly' %}selected{% endif %}>Weekly</option>
+                                <option value="monthly" {% if filter == 'monthly' %}selected{% endif %}>Monthly</option>
+                                <option value="custom" {% if filter == 'custom' %}selected{% endif %}>Custom Date Range</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4" id="date-range" style="display: none;">
+                            <label for="start_date" class="form-label">Start Date:</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control">
+                            <label for="end_date" class="form-label">End Date:</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary mt-4">Generate Report</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h2>Sales Report</h5>
+                        </div>
+                        <div class="col-md-3">
+                            
+                            <div class=" " role="group" aria-label="Download options">
+                                <a href="{% url 'download_sales_report_pdf' %}?filter={{ filter }}&start_date={{ start_date }}&end_date={{ end_date }}" class="btn btn-success btn-sm">Download PDF</a>
+                                <a href="{% url 'download_sales_report_excel' %}?filter={{ filter }}&start_date={{ start_date }}&end_date={{ end_date }}" class="btn btn-success btn-sm">Download Excel</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                   
+                </div>
+                
+                
+            </div>
+            <div class="my-2 container">
+                <div class="container">
+                    <h5 class="my-2">
+                        Showing Sales Report: 
+                        {% if filter == 'daily' %}
+                            Daily
+                        {% elif filter == 'weekly' %}
+                            Weekly
+                        {% elif filter == 'monthly' %}
+                            Monthly
+                        {% elif filter == 'custom' %}
+                            Custom Date Range from {{ start_date }} to {{ end_date }}
+                        {% else %}
+                            Overall
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-primary">Total Sales Count</h5>
+                                <p class="card-text h4">{{ sales_count }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-success">Total Order Amount</h5>
+                                <p class="card-text h4">₹ {{ total_sales }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-info">Offer Discount Given</h5>
+                                <p class="card-text h4">₹ {{ total_offer_discount }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-info">Coupon Discount Given</h5>
+                                <p class="card-text h4">₹ {{ total_coupon_discount }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-info">Shipping Charges</h5>
+                                <p class="card-text h4">₹ {{ total_shipping_charge }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-info">Net Total Revenue</h5>
+                                <p class="card-text h4">₹ {{ net_total_revenue }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+               
+
+               
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Order Date</th>
+                                <th>Order Number</th>
+                                <th>Customer</th>
+                                <th>Total Order Amount</th>
+                                <th>Offer Discount</th>
+                                <th>Coupon Discount</th>
+                                <th>Shipping Charge</th>
+                                <th>Net Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>{{ order.created_at }}</td>
+                                <td>{{order.order_number}}</td>
+                                <td>{{order.user}}</td>
+                                <td>₹ {{ order.order_total }}</td>
+                                <td>₹ {{ order.offer_amount }}</td>
+                                <td>₹ {{ order.discount_amount }}</td>
+                                <td>₹ {{order.shipping_charge}}</td>
+                                <td>₹ {{order.total_amount}}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center">No orders found for the selected period.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+</section> <!-- content-main end// -->
+
+
+
+<script>
+    // Function to toggle the date range fields based on filter selection
+    function toggleDateRange() {
+        const filter = document.getElementById('filter').value;
+        const dateRange = document.getElementById('date-range');
+        if (filter === 'custom') {
+            dateRange.style.display = 'block';
+        } else {
+            dateRange.style.display = 'none';
+        }
+    }
+
+    // Function to validate date range on form submission
+    function validateDateRange() {
+        const filter = document.getElementById('filter').value;
+        if (filter === 'custom') {
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;           
+            const today = new Date().toLocaleDateString('en-CA');
+     
+
+            // Check if start date and end date are provided
+            if (!startDate || !endDate) {
+                swal('Selection Error','Please select both start date and end date.','error');
+                return false;
+            }
+            
+            // Check if start date is before end date
+            if (startDate > endDate) {
+                swal('Selection Error', 'Start date must be before the end date.', 'error');
+                return false;
+            }
+
+            // Check if end date is not after today
+            if (endDate > today) {
+                swal('Selection Error','End date cannot be in the future.', 'error');
+                return false;
+            }
+        }
+        return true; // Allow form submission if all checks pass
+    }
+
+    
+</script>
+
+{% endblock %}

@@ -15,6 +15,11 @@ urlpatterns = [
     path('admin-panel/login/',views.admin_login_view, name='admin_login'),
     path('admin-panel/dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
     path('admin-panel/logout/', views.admin_logout_view, name='admin_logout'),
+    path('admin-panel/sales-report/', views.admin_sales_report_view, name='admin_sales_report'),
+    # path('admin-panel/sales-report/download-pdf', views.download_sales_report_pdf, name='download_sales_report_pdf'),
+    # path('admin-panel/sales-report/download-excel', views.download_sales_report_excel, name='download_sales_report_excel'),
+    
+    
 
     #list of users from accounts app
     path('admin-panel/users/', account_views.admin_users_view, name='admin_users'),

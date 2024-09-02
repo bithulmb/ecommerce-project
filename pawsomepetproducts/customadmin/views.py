@@ -10,6 +10,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 import requests
 from accounts.decorators import superuser_required
+from orders.models import Order
+from product.models import Product_Variant
+from category.models import Category
+from accounts.models import CustomUser
+from django.db.models import Sum, F, Q, Count
+from django.utils import timezone
+from datetime import timedelta
+
+
 
 
 # Create your views here.
@@ -75,7 +84,30 @@ def admin_login_view(request):
 @never_cache
 @superuser_required
 def admin_dashboard_view(request):
-    return render(request, 'admin/admin_dashboard.html')
+
+    delivered_orders = Order.objects.filter(status = 'Delivered')
+    
+    total_order_count = delivered_orders.count()
+    
+    total_revenue = delivered_orders.aggregate(total = Sum('total_amount'))['total']
+
+    product_count = Product_Variant.objects.filter(is_active=True).count()
+
+    category_count = Category.objects.filter(is_active=True).count()
+    
+    users_count = CustomUser.objects.filter(is_active = True, is_blocked = False, is_superadmin= False).count()
+
+    context = {
+        'total_order_count' : total_order_count,
+        'total_revenue' : total_revenue,
+        'product_count' : product_count,
+        'category_count' : category_count,
+        'users_count' : users_count
+
+
+    }
+
+    return render(request, 'admin/admin_dashboard.html', context)
 
 
 
@@ -84,5 +116,64 @@ def admin_dashboard_view(request):
 def admin_logout_view(request):
     logout(request)
     return redirect('admin_login')
+
+
+
+#view function of sales report page after logging in
+@never_cache
+@superuser_required
+def admin_sales_report_view(request):
+    
+    # Initialize variables to store the filter criteria
+    filter_option = request.GET.get('filter', 'overall')  # Default filter is daily
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    orders = Order.objects.filter(status="Delivered", is_ordered = True)
+    # Set default query filters based on the selected option
+    if filter_option == 'daily':        
+        filter_date =timezone.localtime(timezone.now()).date()      
+        orders = orders.filter(created_at__date=filter_date).order_by('-created_at')
+        
+    elif filter_option == 'weekly':        
+        filter_date = timezone.now() - timedelta(days=7)
+        orders = orders.filter(created_at__gte=filter_date).order_by('-created_at')
+    
+    elif filter_option == 'monthly':
+        filter_date = timezone.now() - timedelta(days=30)
+        orders = orders.filter(created_at__gte=filter_date).order_by('-created_at')
+    
+    elif filter_option == 'custom' and start_date and end_date:
+        orders = orders.filter(created_at__range=[start_date, end_date]).order_by('-created_at')
+    
+    else:
+        orders = orders.order_by('-created_at')
+        
+
+    # Calculate report details
+    sales_count = orders.count()
+    total_sales = orders.aggregate(total=Sum('order_total'))['total'] or 0
+    total_offer_discount = orders.aggregate(total=Sum('offer_amount'))['total'] or 0
+    total_coupon_discount = orders.aggregate(total=Sum('discount_amount'))['total'] or 0 
+    total_shipping_charge = orders.aggregate(total = Sum('shipping_charge'))['total'] or 0 
+    net_total_revenue = orders.aggregate(total = Sum('total_amount'))['total'] or 0
+    
+
+    context = {
+        'orders': orders,
+        'sales_count': sales_count,
+        'total_sales': total_sales,
+        'total_offer_discount': total_offer_discount,
+        'total_coupon_discount': total_coupon_discount,
+        'filter': filter_option,
+        'start_date': start_date,
+        'end_date': end_date,
+        'total_shipping_charge' : total_shipping_charge,
+        'net_total_revenue' : net_total_revenue,
+
+    }
+ 
+
+    return render(request, 'admin/admin_sales_report.html', context)
 
 

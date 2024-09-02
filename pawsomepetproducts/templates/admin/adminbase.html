@@ -70,18 +70,25 @@
                 </li>
 
 
-                <li class="menu-item {% active_link 'admin_products || admin_edit_product || admin_add_product' %}" >
-                    <a class="menu-link" href="{% url 'admin_products' %}"> <i class="icon material-icons md-shopping_bag"></i>
+                <li class="menu-item has-submenu {% active_link 'admin_products || admin_edit_product || admin_add_product admin_product_variants || admin_edit_product_variant || admin_add_product_variant' %}" >
+                    <a class="menu-link" href=""> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text">Product Management</span>
                     </a>
                    
+                        <div class="submenu">
+                            <a href="{% url 'admin_products' %}">Product List</a>
+                            <a href="{% url 'admin_product_variants' %}">Product Variant List</a>
+                            
+                        </div>
+                    
+                   
                 </li>
-                <li class="menu-item {% active_link 'admin_product_variants || admin_edit_product_variant || admin_add_product_variant' %}">
+                <!-- <li class="menu-item {% active_link 'admin_product_variants || admin_edit_product_variant || admin_add_product_variant' %}">
                     <a class="menu-link" href="{% url 'admin_product_variants' %}"> <i class="icon material-icons md-library_add"></i>
                         <span class="text">Product Variant Management</span>
                     </a>
         
-                </li>
+                </li> -->
               
                 <li class="menu-item {% active_link 'admin_category || admin_edit_category || admin_add_category' %}">
                     <a class="menu-link" href="{% url 'admin_category' %}"> <i class="icon material-icons md-view_list"></i>
@@ -102,14 +109,9 @@
                    
                 </li>
 
-                <!-- <li class="menu-item {% active_link 'admin_offers || admin_edit_offer || admin_add_offer' %}">
-                    <a class="menu-link" href="{% url 'admin_offers' %}"> <i class="icon material-icons md-grade"></i>
-                        <span class="text">Offer Management</span>
-                    </a>
-                   
-                </li> -->
+    
 
-                <li class="menu-item has-submenu {% active_link 'admin_offers || admin_edit_offer || admin_add_offer' %}">
+                <li class="menu-item has-submenu {% active_link 'admin_offers || admin_edit_product_offer || admin_add_product_offer || admin_add_category_offer || admin_edit_category_offer'  %}">
                     <a class="menu-link" href="#"> <i class="icon material-icons md-grade"></i>
                         <span class="text">Offer Management</span>
                     </a>
@@ -122,7 +124,7 @@
                 
             
                 <li class="menu-item {% active_link 'admin_sales_report' %}">
-                    <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
+                    <a class="menu-link" disabled href="{% url 'admin_sales_report' %}"> <i class="icon material-icons md-pie_chart"></i>
                         <span class="text">Sales Report</span>
                     </a>
                 </li>
