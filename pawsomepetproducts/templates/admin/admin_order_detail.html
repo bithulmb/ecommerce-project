@@ -41,14 +41,14 @@
                     
                     <!-- <p>Payment_method: <strong>{{order.payment_method}}</strong></p> -->
                     <p>Delivery Address :  <strong>
-                        {{ order.address.name}}, 
-                        {{ order.address.address_line1 }}, 
-                        {{ order.address.address_line2 }},
-                        {{ order.address.town }},
-                        {{ order.address.city }},
-                        {{ order.address.state }}
-                         - {{ order.address.pincode }},
-                        Contact - {{ order.address.contact_number }}</strong>
+                        {{ order.order_address.name}}, 
+                        {{ order.order_address.address_line1 }}, 
+                        {{ order.order_address.address_line2 }},
+                        {{ order.order_address.town }},
+                        {{ order.order_address.city }},
+                        {{ order.order_address.state }}
+                         - {{ order.order_address.pincode }},
+                        Contact - {{ order.order_address.contact_number }}</strong>
                     </p>
                     <p> Order Status: <strong>{{ order.get_status_display }}</strong> </p>
                     

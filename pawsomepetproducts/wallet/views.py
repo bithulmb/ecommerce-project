@@ -11,5 +11,4 @@ def user_wallet_view(request):
         'wallet':wallet,
         'transactions' : transactions,
     }
-    print(transactions)
     return render(request, 'user_home/user_wallet.html',context)

@@ -92,15 +92,27 @@
                     </h5>
                 </div>
                 <div class="row">
-                    <div class="col-md-2">
+                    <div class="col-md-3 m-auto">
                         <div class="card bg-light">
                             <div class="card-body text-center">
-                                <h5 class="card-title text-primary">Total Sales Count</h5>
+                                <h5 class="card-title text-primary">Total Orders Delivered</h5>
                                 <p class="card-text h4">{{ sales_count }}</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3 m-auto">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-primary">Total Orders Cancelled</h5>
+                                <p class="card-text h4">{{ cancelled_orders_count }}</p>
+                            </div>
+                        </div>
+                    </div>                    
+                   
+                    
+                </div>
+                <div class="row">
+                    <div class="col-md-2 m-auto">
                         <div class="card bg-light">
                             <div class="card-body text-center">
                                 <h5 class="card-title text-success">Total Order Amount</h5>
@@ -108,7 +120,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2 m-auto">
                         <div class="card bg-light">
                             <div class="card-body text-center">
                                 <h5 class="card-title text-info">Offer Discount Given</h5>
@@ -116,7 +128,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2 m-auto">
                         <div class="card bg-light">
                             <div class="card-body text-center">
                                 <h5 class="card-title text-info">Coupon Discount Given</h5>
@@ -124,7 +136,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2 m-auto">
                         <div class="card bg-light">
                             <div class="card-body text-center">
                                 <h5 class="card-title text-info">Shipping Charges</h5>
@@ -235,7 +247,7 @@
             
             
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({orientation: "landscape",});
             const table = document.getElementById('sales-table');
             
             // Add title

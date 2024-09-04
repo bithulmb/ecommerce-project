@@ -45,14 +45,14 @@
             
                 <div class="col mt-3">
                     <p>Delivery Address :  <strong>
-                        {{ order.address.name}}, 
-                        {{ order.address.address_line1 }}, 
-                        {{ order.address.address_line2 }},
-                        {{ order.address.town }},
-                        {{ order.address.city }},
-                        {{ order.address.state }}
-                         - {{ order.address.pincode }},
-                        Contact - {{ order.address.contact_number }}</strong>
+                        {{ order.order_address.name}}, 
+                        {{ order.order_address.address_line1 }}, 
+                        {{ order.order_address.address_line2 }},
+                        {{ order.order_address.town }},
+                        {{ order.order_address.city }},
+                        {{ order.order_address.state }}
+                         - {{ order.order_address.pincode }},
+                        Contact - {{ order.order_address.contact_number }}</strong>
                     </p>
                     <div class="text-right"> <a href="{% url 'view_invoice' order.id %}" class="btn btn-info btn-sm ">View/Download Invoice</a></div>
                     <h3> Order Items:</h3>

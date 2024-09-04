@@ -23,10 +23,10 @@ class AddCouponForm(ModelForm):
         code = self.cleaned_data['code'].upper()  # Convert to uppercase for consistent checking
 
         # Check if a coupon with the same code (case insensitive) already exists
-        if Coupon.objects.filter(code__iexact=code).exists():
-            raise forms.ValidationError("A coupon with this code already exists. Please choose a different code.")
+        if not self.instance.pk:
+            if Coupon.objects.filter(code__iexact=code).exists():
+                raise forms.ValidationError("A coupon with this code already exists. Please choose a different code.")
 
-        # Return the cleaned code (converted to uppercase)
         return code
     
     def clean_discount(self):

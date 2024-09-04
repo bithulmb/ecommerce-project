@@ -4,7 +4,7 @@ from cart.models import CartItem,Cart
 from django.core.exceptions import ObjectDoesNotExist
 from accounts.models import Address
 from accounts.forms import AddAddressForm
-from .models import Order,Payment,OrderProduct
+from .models import Order,Payment,OrderProduct,OrderAddress
 import datetime
 from django.http import HttpResponse
 from product.models import Product_Variant
@@ -171,18 +171,33 @@ def place_order_view(request):
     if request.method =='POST':
         address_id = request.POST.get('address_id')
         payment_method = request.POST.get('payment_method')
+        address = Address.objects.get(id=address_id)
 
         #if the user has selected cash on delivery option in payment method
         if payment_method=="cash_on_delivery":
 
             try:
                 with transaction.atomic():
-                    address = Address.objects.get(id=address_id)
-            
+                    
+
+                    #creating an orderaddress instance
+                    order_address = OrderAddress.objects.create(
+                        name = address.name,
+                        address_line1 = address.address_line1,
+                        address_line2=address.address_line2,
+                        town=address.town,
+                        city = address.city,
+                        state = address.state,
+                        pincode = address.pincode,
+                        contact_number = address.contact_number
+                    )
+
+
+
                     #creating an order instance and saving
                     order_instance = Order()
-                    order_instance.user=current_user
-                    order_instance.address=address
+                    order_instance.user=current_user                    
+                    order_instance.order_address=order_address
                     order_instance.order_total=total
                     order_instance.offer_amount = offer_discount
                     order_instance.shipping_charge = shipping_charge
@@ -259,10 +274,23 @@ def place_order_view(request):
             client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
             amount = int(grand_total * 100)  # Convert to paisa          
             
+            #creating an orderaddress instance
+            order_address = OrderAddress.objects.create(
+                name = address.name,
+                address_line1 = address.address_line1,
+                address_line2=address.address_line2,
+                town=address.town,
+                city = address.city,
+                state = address.state,
+                pincode = address.pincode,
+                contact_number = address.contact_number
+            )
+
+            
             #creating an order instance and saving
             order_instance = Order()
             order_instance.user = current_user
-            order_instance.address = Address.objects.get(id=address_id)
+            order_instance.order_address = order_address            
             order_instance.order_total=total
             order_instance.offer_amount = offer_discount
             order_instance.shipping_charge = shipping_charge
@@ -321,11 +349,25 @@ def place_order_view(request):
             if wallet.balance >= grand_total:
                 try:
                     with transaction.atomic():
+                        
+                         #creating an orderaddress instance
+                        order_address = OrderAddress.objects.create(
+                            name = address.name,
+                            address_line1 = address.address_line1,
+                            address_line2=address.address_line2,
+                            town=address.town,
+                            city = address.city,
+                            state = address.state,
+                            pincode = address.pincode,
+                            contact_number = address.contact_number
+                        )
+
+
 
                         #creating an order instance and saving
                         order_instance = Order()
                         order_instance.user = current_user
-                        order_instance.address = Address.objects.get(id=address_id)
+                        order_instance.order_address = order_address
                         order_instance.order_total=total
                         order_instance.offer_amount = offer_discount
                         order_instance.shipping_charge = shipping_charge
@@ -405,11 +447,25 @@ def place_order_view(request):
                     return redirect('checkout')
            
                 
-            if wallet.balance>0:                                                                       
+            if wallet.balance>0:
+
+                #creating an orderaddress instance
+                order_address = OrderAddress.objects.create(
+                    name = address.name,
+                    address_line1 = address.address_line1,
+                    address_line2=address.address_line2,
+                    town=address.town,
+                    city = address.city,
+                    state = address.state,
+                    pincode = address.pincode,
+                    contact_number = address.contact_number
+                )
+
+
                 #creating an order instance and saving
                 order_instance = Order()
                 order_instance.user = current_user
-                order_instance.address = Address.objects.get(id=address_id)
+                order_instance.order_address = order_address
                 order_instance.order_total=total
                 order_instance.offer_amount = offer_discount
                 order_instance.shipping_charge = shipping_charge
@@ -432,6 +488,7 @@ def place_order_view(request):
                
                 wallet_payment_amount = wallet.balance
                 online_payment_amount = grand_total - wallet_payment_amount
+                
                 # authorize razorpay client with API Keys.
                 client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
                 amount  = int(online_payment_amount * 100) #for converting amount to paisa for collection

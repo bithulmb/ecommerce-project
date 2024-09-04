@@ -2,6 +2,8 @@
 
 {% block content %}
 
+<!-- Add Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- content-main start// -->
 <section class="content-main">
@@ -12,84 +14,239 @@
         </div>
     </div>
     <div class="row">
+        <!-- Revenue Card -->
         <div class="col-lg-3">
             <div class="card card-body mb-4">
                 <article class="icontext">
-                    <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
+                    <span class="icon icon-sm rounded-circle bg-primary-light">
+                        <i class="text-primary material-icons md-monetization_on"></i>
+                    </span>
                     <div class="text">
                         <h6 class="mb-1 card-title">Revenue</h6>
                         <span>₹ {{total_revenue}}</span>
-                        <span class="text-sm">
-                            From delivered orders
-                        </span>
+                        <span class="text-sm">From delivered orders</span>
                     </div>
                 </article>
             </div>
         </div>
+        <!-- Orders Card -->
         <div class="col-lg-3">
             <div class="card card-body mb-4">
                 <article class="icontext">
-                    <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
+                    <span class="icon icon-sm rounded-circle bg-success-light">
+                        <i class="text-success material-icons md-local_shipping"></i>
+                    </span>
                     <div class="text">
-                        <h6 class="mb-1 card-title">Orders</h6> <span>{{total_order_count}}</span>
-                        <span class="text-sm">
-                            Excluding orders in transit
-                        </span>
+                        <h6 class="mb-1 card-title">Orders</h6> 
+                        <span>{{delivered_order_count}}</span>
+                        <span class="text-sm">Excluding orders in transit</span>
                     </div>
                 </article>
             </div>
         </div>
+        <!-- Products Card -->
         <div class="col-lg-3">
             <div class="card card-body mb-4">
                 <article class="icontext">
-                    <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
+                    <span class="icon icon-sm rounded-circle bg-warning-light">
+                        <i class="text-warning material-icons md-qr_code"></i>
+                    </span>
                     <div class="text">
-                        <h6 class="mb-1 card-title">Products</h6> <span>{{product_count}}</span>
-                        <span class="text-sm">
-                            In {{category_count}} Categories
-                        </span>
+                        <h6 class="mb-1 card-title">Products</h6> 
+                        <span>{{product_count}}</span>
+                        <span class="text-sm">In {{category_count}} Categories</span>
                     </div>
                 </article>
             </div>
         </div>
+        <!-- Users Card -->
         <div class="col-lg-3">
             <div class="card card-body mb-4">
                 <article class="icontext">
-                    <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-person"></i></span>
+                    <span class="icon icon-sm rounded-circle bg-info-light">
+                        <i class="text-info material-icons md-person"></i>
+                    </span>
                     <div class="text">
-                        <h6 class="mb-1 card-title">Users</h6> <span>{{users_count}}</span>
-                        <span class="text-sm">
-                           Excludes inactive and blocked users
-                        </span>
+                        <h6 class="mb-1 card-title">Users</h6> 
+                        <span>{{users_count}}</span>
+                        <span class="text-sm">Excludes inactive and blocked users</span>
                     </div>
                 </article>
             </div>
         </div>
     </div>
     <div class="row">
+        <div class="col-md-7 m-auto">
+            <div class="card mb-6">
+                <article class="card-body">
+                    <h5 class=" h3 card-title">Total Orders Delivered : {{delivered_order_count}} </h5>
+                    <h5 class="h3 card-title">Total Orders in Processing Status : {{processing_orders_count}} </h5>
+                    <h5 class="h3 card-title">Total Orders in Shipped Status: {{shipped_orders_count}}</h5>
+                    <h5 class="h3 card-title">Total Orders Cancelled : {{cancelled_orders_count}} </h5>
+                   
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-xl-8 col-lg-12">
             <div class="card mb-4">
                 <article class="card-body">
-                    <h5 class="card-title">Sale statistics</h5>
-                    <canvas id="myChart" height="120px"></canvas>
+                    <h5 class="card-title">Sale Statistics</h5>
+                    <!-- Filter Type Dropdown -->
+                    <select id="filterType">
+                        <option value="weekly" selected>Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                    <!-- Canvas for Chart.js -->
+                    <canvas id="salesChart" height="120px"></canvas>
                 </article>
             </div>
-            
         </div>
         <div class="col-xl-4 col-lg-12">
-
             <div class="card mb-4">
                 <article class="card-body">
-                    <h5 class="card-title">Top Selling Products</h5>
-                   
+                    <h5 class="card-title">Category Wise Sales</h5>
+                    <canvas id="categoryChart" width="400" height="400"></canvas>
                 </article>
-            </div>   
-
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Top 10 Best-Selling Products Card -->
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Top 10 Best-Selling Products</h5>
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#topProductsCollapse" aria-expanded="false" aria-controls="topProductsCollapse">
+                        <i class="material-icons md-keyboard_arrow_down"></i>
+                    </button>
+                </div>
+                <div class="collapse" id="topProductsCollapse">
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sl No</th>
+                                    <th>Product</th>
+                                    <th>Total Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in top_products %}
+                                <tr>
+                                    <td>{{forloop.counter}}</td>
+                                    <td>{{ product.product__product_name__name }} - {{product.product__size}}</td>
+                                    <td>{{ product.total_quantity }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <!-- Top 10 Best-Selling Categories Card -->
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Best-Selling Categories</h5>
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#topCategoriesCollapse" aria-expanded="false" aria-controls="topCategoriesCollapse">
+                        <i class="material-icons md-keyboard_arrow_down"></i>
+                    </button>
+                </div>
+                <div class="collapse" id="topCategoriesCollapse">
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sl No</th>
+                                    <th>Category</th>
+                                    <th>Total Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in top_categories %}
+                                <tr>
+                                    <td>{{ forloop.counter }} </td>
+                                    <td>{{ category.product__product_name__category__name }}</td>
+                                    <td>{{ category.total_quantity }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    
 </section>
- <!-- content-main end// -->
+
+<!-- content-main end// -->
+
+<script>
+// Function to create or update the chart
+function createOrUpdateChart(labels, data) {
+    // Check if window.salesChart exists and is a Chart instance, then destroy it
+    if (window.salesChart && typeof window.salesChart.destroy === 'function') {
+        window.salesChart.destroy();
+    }
+
+    // Get the context of the canvas where the chart will be drawn
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    // Create the new chart with the updated data
+    window.salesChart = new Chart(ctx, {
+        type: 'bar', // or 'line', 'pie', etc.
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Sales in Rs',
+                data: data,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: true,
+        }
+    });
+}
+
+// Fetch sales data and update the chart
+function fetchSalesData(filterType) {
+    fetch(`/admin-panel/get-sales-data?filter=${filterType}`)
+        .then(response => response.json())
+        .then(data => {
+            // Call the function to create or update the chart with the fetched data
+            createOrUpdateChart(data.labels, data.data);
+        })
+        .catch(error => {
+            console.error('Error fetching sales data:', error);
+        });
+}
+
+// Add a change event listener to the select element
+document.getElementById('filterType').addEventListener('change', function() {
+    // Get the selected filter type
+    const filterType = this.value;
+    // Fetch and update the sales data based on the selected filter
+    fetchSalesData(filterType);
+});
+
+// Initial load with default filter (e.g., weekly)
+fetchSalesData('weekly');
+</script>
+
 
 {% endblock %}

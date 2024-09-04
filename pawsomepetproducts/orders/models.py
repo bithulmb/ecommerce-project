@@ -6,6 +6,21 @@ from coupons.models import Coupon
 
 
 # Create your models here.
+
+class OrderAddress(models.Model):
+    name=models.CharField(max_length=30, null=True)
+    address_line1=models.CharField(max_length=50)
+    address_line2=models.CharField(max_length=50, blank=True)
+    town=models.CharField(max_length=40)
+    city=models.CharField(max_length=40)
+    state=models.CharField(max_length=40)
+    pincode=models.CharField(max_length=10)
+    contact_number=models.CharField(max_length=20)
+
+    def __str__(self) -> str:
+        return f"{self.address_line1},{self.town},{self.city}"
+
+
 class Payment(models.Model):
     user            = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     payment_id      = models.CharField(max_length=50)
@@ -36,9 +51,9 @@ class Order(models.Model):
     )
     user            = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
     payment_method  = models.CharField(max_length=30, choices=PAYMENT_METHODS, null=True)
-    payment         = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
-    address         = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
+    payment         = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)    
     order_number    = models.CharField(max_length=20)
+    order_address   = models.ForeignKey(OrderAddress, on_delete=models.PROTECT, null=True)
    
     total_amount    = models.DecimalField(max_digits=8, decimal_places=2)
     status          = models.CharField(max_length=20, choices=STATUS, default='Processing')
@@ -72,3 +87,6 @@ class OrderProduct(models.Model):
     
     def subtotal(self):
         return self.product_price*self.quantity 
+
+
+
