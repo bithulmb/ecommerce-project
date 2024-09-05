@@ -334,3 +334,50 @@ def get_sales_data(request):
         'data': data,
     })
 
+
+
+
+
+def get_category_sales_data(request):
+    labels = []
+    data = []
+   
+ 
+    category_sales = (
+        OrderProduct.objects
+        .filter(order__status='Delivered')  
+        .values('product__product_name__category__name')  
+        .annotate(total_sales=Sum(F('quantity') * F('product_price')))  
+    )
+      
+    labels = [entry['product__product_name__category__name'] for entry in category_sales]
+    data = [entry['total_sales'] for entry in category_sales]
+    
+
+    
+    return JsonResponse(data={
+        'labels': labels,
+        'data': data,
+    })
+
+def get_category_count_data(request):
+    labels = []
+    data = []
+   
+ 
+    category_sales = (
+        OrderProduct.objects
+        .filter(order__status='Delivered')  
+        .values('product__product_name__category__name')  
+        .annotate(total_sales=Sum('quantity'))  
+    )
+      
+    labels = [entry['product__product_name__category__name'] for entry in category_sales]
+    data = [entry['total_sales'] for entry in category_sales]
+    
+
+    
+    return JsonResponse(data={
+        'labels': labels,
+        'data': data,
+    })
