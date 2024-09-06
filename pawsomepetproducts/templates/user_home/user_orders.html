@@ -45,10 +45,21 @@
                                 <td>{{ order.order_number }}</td>        
                                 <td>₹ {{ order.total_amount }}</td>
                                 <td>{{order.payment_method}} </td>
-                                <td>{{ order.get_status_display }} </td>
+
                                 <td>
-                                    <a href="{% url 'user_order_details' order.order_number %}" class="btn btn-info">Details</a>
+                                    {% if order.is_ordered == True %}
+                                        {{ order.get_status_display }}
+                                    {% else %}
+                                        Payment Pending
+                                    {% endif %}
                                     
+                                 </td>
+                                <td>
+                                    {% if order.is_ordered == True %}
+                                    <a href="{% url 'user_order_details' order.order_number %}" class="btn btn-info">Details</a>
+                                    {% else %}                                    
+                                    <a href="{% url 'user_pending_order_payment' order.id %}" class = "btn btn-outline-success">Pay</a>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

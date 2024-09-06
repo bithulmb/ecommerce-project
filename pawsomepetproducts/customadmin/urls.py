@@ -19,12 +19,7 @@ urlpatterns = [
     path('admin-panel/get-sales-data/', views.get_sales_data, name='get_sales_data'),
     path('admin-panel/get-category-sales-data/', views.get_category_sales_data, name='get_category_sales_data'),
     path('admin-panel/get-category-count-data/', views.get_category_count_data, name='get_category_count_data'),
-    # path('admin-panel/population-chart/', views.population_chart, name='population-chart'),
-    # path('admin-panel/sales-report/download-pdf', views.download_sales_report_pdf, name='download_sales_report_pdf'),
-    # path('admin-panel/sales-report/download-excel', views.download_sales_report_excel, name='download_sales_report_excel'),
     
-    
-
     #list of users from accounts app
     path('admin-panel/users/', account_views.admin_users_view, name='admin_users'),
     path('admin-panel/users/edit/<int:pk>', account_views.admin_edit_user_view, name='admin_edit_user'),

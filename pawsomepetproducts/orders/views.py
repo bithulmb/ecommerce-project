@@ -24,6 +24,7 @@ from django.template.loader import render_to_string
 from weasyprint import HTML
 from wallet.models import Wallet, WalletTransaction
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 
 client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
 
@@ -332,7 +333,8 @@ def place_order_view(request):
                 context={
                     'order_id':order_id,
                     'amount': amount,
-                    'user': current_user
+                    'user': current_user,
+                    'online_payment_amount' : grand_total,
 
                     
                 }
@@ -447,7 +449,7 @@ def place_order_view(request):
                     return redirect('checkout')
            
                 
-            if wallet.balance>0:
+            if wallet.balance > 0:
 
                 #creating an orderaddress instance
                 order_address = OrderAddress.objects.create(
@@ -740,7 +742,7 @@ def view_invoice(request, order_id):
 @login_required(login_url='login_page')
 @never_cache
 def user_orders_view(request):
-    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
 
     context = {
         'orders': orders,
@@ -814,6 +816,10 @@ def user_cancel_order_view(request, order_number):
     
     return render(request, 'user_home/confirm_cancel_order.html',{'order':order})
 
+
+
+
+
 #view function for downloading pdf of invoices
 @login_required(login_url='login_page')
 def download_invoice_pdf_view(request, order_id):
@@ -876,3 +882,44 @@ def user_return_order_view(request, order_number):
         return redirect('user_order_details', order.order_number)
     
     return render(request, 'user_home/confirm_return_order.html',{'order':order})
+
+
+
+#view function for making payment of pending order
+@login_required(login_url='login_page')
+def user_pending_order_payment_view(request, order_id):
+    
+    order_instance = get_object_or_404(Order,id=order_id)
+
+    client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
+    amount = int(order_instance.total_amount * 100)  # Convert to paisa  
+
+    data = { 
+                "amount": amount, 
+                "currency": "INR", 
+                "receipt": order_instance.order_number,
+                "payment_capture": "1",
+                 } 
+     #create a razor pay order
+    razorpay_order=client.order.create(data = data)
+    
+    order_id=razorpay_order['id']
+    order_status=razorpay_order['status']
+    context={}
+
+
+    if order_status == 'created':
+
+        context={
+            'order_id':order_id,
+            'amount': amount,
+            'user': request.user,
+            'online_payment_amount' : order_instance.total_amount,
+
+            
+        }
+    # Store the Razorpay order ID  and orderin session
+    request.session['razorpay_order_id'] = razorpay_order['id']
+    request.session['order_id'] = order_instance.id
+    
+    return render(request, 'user_home/payment.html', context=context)      
