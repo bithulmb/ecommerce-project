@@ -64,6 +64,8 @@
                             <th>Quantity</th>
                             <th>Price</th>
                             <th>Total</th>
+                            
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,6 +81,21 @@
                             <td>{{ item.quantity }}</td>
                             <td>₹ {{ item.product_price }}</td>
                             <td>₹ {{ item.subtotal }}</td>
+                            
+                            {% if order_items.count > 1 %}
+                            <td>{% if item.order_item_status == 'Processing' or item.order_item_status == 'Shipped' %}
+
+                                <a href="{% url 'user_cancel_order_item' order.order_number item.id %}" class="btn btn-outline-danger btn-sm">Cancel Item</a>                                
+                     
+                                {% elif item.order_item_status == 'Delivered' %}
+                                <a href="{% url 'user_return_order_item' order.order_number item.id %}" class="btn btn-outline-danger btn-sm">Return Item</a>
+                                {% elif item.order_item_status == 'Cancelled' %}
+                                Cancelled
+                                {% elif item.order_item_status == 'Returned' %}
+                                Returned
+                                {% endif %}
+                            </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>

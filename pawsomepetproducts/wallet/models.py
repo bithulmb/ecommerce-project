@@ -6,7 +6,7 @@ from accounts.models import CustomUser
 class Wallet(models.Model):
     user        = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='wallet')
     balance     = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
-    updated_at  = updated_at = models.DateField(auto_now=True)
+    updated_at  = models.DateField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.first_name}'s Wallet"

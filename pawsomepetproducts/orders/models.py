@@ -70,7 +70,21 @@ class Order(models.Model):
     def __str__(self):
         return self.order_number
     
+    def calculate_discounts(self):
+        total_before_coupon = sum(item.product_price * item.quantity for item in self.items.all())
+
+        
+    
 class OrderProduct(models.Model):
+
+    STATUS = (
+        ('Processing', 'Processing'),
+        ('Shipped', 'Shipped'),
+        ('Delivered', 'Delivered'),
+        ('Cancelled', 'Cancelled'),
+        ('Returned', 'Returned'),
+     
+    )
     
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True,)
@@ -79,6 +93,14 @@ class OrderProduct(models.Model):
     product_price = models.DecimalField(max_digits=8,decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+
+    order_item_status  = models.CharField(max_length= 20 , choices=STATUS, default = "Processing",  null=True)
+    offer_discount = models.DecimalField(max_digits=8,decimal_places=2, null=True)
+    offer_price = models.DecimalField(max_digits=8,decimal_places=2, null=True)
+    coupon_discount = models.DecimalField(max_digits=8,decimal_places=2, null=True)
+    final_price = models.DecimalField(max_digits=8,decimal_places=2, null=True)
+
 
     
     def __str__(self):
@@ -87,6 +109,6 @@ class OrderProduct(models.Model):
     
     def subtotal(self):
         return self.product_price*self.quantity 
-
+    
 
 

@@ -68,10 +68,12 @@ urlpatterns = [
     path('order/invoice/<int:order_id>/download-pdf/', order_views.download_invoice_pdf_view, name='download_invoice_pdf'),
     path('user/orders/', order_views.user_orders_view, name="user_orders"),
     path('user/orders/<str:order_number>/', order_views.user_order_details_view, name="user_order_details"),
-    path('user/orders/<str:order_number>/cancel', order_views.user_cancel_order_view, name="user_cancel_order"),
-    path('user/orders/<str:order_number>/return', order_views.user_return_order_view, name="user_return_order"),
-    path('user/orders/<int:order_id>/payment', order_views.user_pending_order_payment_view, name="user_pending_order_payment"),
-    
+    path('user/orders/<str:order_number>/cancel/', order_views.user_cancel_order_view, name="user_cancel_order"),
+    path('user/orders/<str:order_number>/return/', order_views.user_return_order_view, name="user_return_order"),
+    path('user/orders/<int:order_id>/payment/', order_views.user_pending_order_payment_view, name="user_pending_order_payment"),
+    path('user/orders/<str:order_number>/item/<int:item_id>/cancel/', order_views.user_cancel_order_item_view, name="user_cancel_order_item"),
+    path('user/orders/<str:order_number>/item/<int:item_id>/return/', order_views.user_return_order_item_view, name="user_return_order_item"),
+
     path('user/payment/status', order_views.payment_status, name="payment_status"),#razor pay payment url
     path('user/wallet_payment/status', order_views.wallet_payment_status, name="wallet_payment_status"),#razor pay payment url for wallet payment also.
    

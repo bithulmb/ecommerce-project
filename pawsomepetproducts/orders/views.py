@@ -244,7 +244,19 @@ def place_order_view(request):
                         order_product_instance.product=item.variant
                         order_product_instance.quantity=item.quantity
                         order_product_instance.product_price=item.variant.price
+                        
+                        order_product_instance.offer_discount = item.variant.discount_amount() * order_product_instance.quantity
+                        order_product_instance.offer_price = item.variant.get_offer_price() * order_product_instance.quantity                       
+                        if order_instance.coupon:
+                            item_percentage = (order_product_instance.offer_price ) / (order_instance.order_total - order_instance.offer_amount + order_instance.shipping_charge)
+                            item_coupon_discount = order_instance.discount_amount * item_percentage
+                        else:
+                            item_coupon_discount = 0                        
+                        order_product_instance.coupon_discount = item_coupon_discount
+                        order_product_instance.final_price = (order_product_instance.offer_price) - order_product_instance.coupon_discount 
+                        
                         order_product_instance.save() 
+                        
 
                     #reduce the number of stock of product
                         product=Product_Variant.objects.get(id=item.variant.id)
@@ -426,6 +438,17 @@ def place_order_view(request):
                             order_product_instance.product=item.variant
                             order_product_instance.quantity=item.quantity
                             order_product_instance.product_price=item.variant.price
+                            
+                            order_product_instance.offer_discount = item.variant.discount_amount() * order_product_instance.quantity
+                            order_product_instance.offer_price = item.variant.get_offer_price() * order_product_instance.quantity                       
+                            if order_instance.coupon:
+                                item_percentage = (order_product_instance.offer_price ) / (order_instance.order_total - order_instance.offer_amount + order_instance.shipping_charge)
+                                item_coupon_discount = order_instance.discount_amount * item_percentage
+                            else:
+                                item_coupon_discount = 0                        
+                            order_product_instance.coupon_discount = item_coupon_discount
+                            order_product_instance.final_price = (order_product_instance.offer_price) - order_product_instance.coupon_discount 
+                            
                             order_product_instance.save() 
 
                         #reduce the number of stock of product
@@ -603,6 +626,17 @@ def wallet_payment_status (request) :
                     order_product_instance.product=item.variant
                     order_product_instance.quantity=item.quantity
                     order_product_instance.product_price=item.variant.price
+                    
+                    order_product_instance.offer_discount = item.variant.discount_amount() * order_product_instance.quantity
+                    order_product_instance.offer_price = item.variant.get_offer_price() * order_product_instance.quantity                       
+                    if order_instance.coupon:
+                        item_percentage = (order_product_instance.offer_price ) / (order_instance.order_total - order_instance.offer_amount + order_instance.shipping_charge)
+                        item_coupon_discount = order_instance.discount_amount * item_percentage
+                    else:
+                        item_coupon_discount = 0                        
+                    order_product_instance.coupon_discount = item_coupon_discount
+                    order_product_instance.final_price = (order_product_instance.offer_price) - order_product_instance.coupon_discount 
+
                     order_product_instance.save() 
 
                 #reduce the number of stock of product
@@ -650,6 +684,7 @@ def payment_status (request) :
             # payment successful, save payment details
             order_id = request.session.get('order_id')
             order_instance = Order.objects.get(id=order_id)
+            
             #creating an isntance of payment and saving
             payment_instance = Payment(
                 user=request.user,
@@ -680,6 +715,15 @@ def payment_status (request) :
                 order_product_instance.product=item.variant
                 order_product_instance.quantity=item.quantity
                 order_product_instance.product_price=item.variant.price
+                order_product_instance.offer_discount = item.variant.discount_amount() * order_product_instance.quantity
+                order_product_instance.offer_price = item.variant.get_offer_price() * order_product_instance.quantity                       
+                if order_instance.coupon:
+                    item_percentage = (order_product_instance.offer_price ) / (order_instance.order_total - order_instance.offer_amount + order_instance.shipping_charge)
+                    item_coupon_discount = order_instance.discount_amount * item_percentage
+                else:
+                    item_coupon_discount = 0                        
+                order_product_instance.coupon_discount = item_coupon_discount
+                order_product_instance.final_price = (order_product_instance.offer_price) - order_product_instance.coupon_discount 
                 order_product_instance.save() 
 
             #reduce the number of stock of product
@@ -890,36 +934,188 @@ def user_return_order_view(request, order_number):
 def user_pending_order_payment_view(request, order_id):
     
     order_instance = get_object_or_404(Order,id=order_id)
-
     client  = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
-    amount = int(order_instance.total_amount * 100)  # Convert to paisa  
 
-    data = { 
-                "amount": amount, 
-                "currency": "INR", 
-                "receipt": order_instance.order_number,
-                "payment_capture": "1",
-                 } 
-     #create a razor pay order
-    razorpay_order=client.order.create(data = data)
+    if order_instance.payment_method == "Online":
+        
+        amount = int(order_instance.total_amount * 100)  # Convert to paisa  
+
+        data = { 
+                    "amount": amount, 
+                    "currency": "INR", 
+                    "receipt": order_instance.order_number,
+                    "payment_capture": "1",
+                    } 
+        #create a razor pay order
+        razorpay_order=client.order.create(data = data)
+        
+        order_id=razorpay_order['id']
+        order_status=razorpay_order['status']
+        context={}
+
+
+        if order_status == 'created':
+
+            context={
+                'order_id':order_id,
+                'amount': amount,
+                'user': request.user,
+                'online_payment_amount' : order_instance.total_amount,
+
+                
+            }
+        # Store the Razorpay order ID  and orderin session
+        request.session['razorpay_order_id'] = razorpay_order['id']
+        request.session['order_id'] = order_instance.id
+        
+        return render(request, 'user_home/payment.html', context=context)      
     
-    order_id=razorpay_order['id']
-    order_status=razorpay_order['status']
-    context={}
+    if order_instance.payment_method == "Wallet with Online Payment":
 
+        wallet = Wallet.objects.get(user=request.user)
 
-    if order_status == 'created':
+        if wallet.balance > 0:
+            wallet_payment_amount = wallet.balance
+            online_payment_amount = order_instance.total_amount - wallet_payment_amount
 
-        context={
-            'order_id':order_id,
-            'amount': amount,
-            'user': request.user,
-            'online_payment_amount' : order_instance.total_amount,
+            amount  = int(online_payment_amount * 100) #for converting amount to paisa for collection
 
+            data = { 
+                    "amount": amount, 
+                    "currency": "INR", 
+                    "receipt": order_instance.order_number,
+                    "payment_capture": "1",
+                 }
+                
+            #create a razor pay order
+            razorpay_order=client.order.create(data = data)
             
-        }
-    # Store the Razorpay order ID  and orderin session
-    request.session['razorpay_order_id'] = razorpay_order['id']
-    request.session['order_id'] = order_instance.id
+            order_id=razorpay_order['id']
+            order_status=razorpay_order['status']
+            context={}
+
+
+            if order_status == 'created':
+
+                context={
+                    'order_id':order_id,
+                    'amount': amount,
+                    'user': request.user,
+                    'wallet_payment_amount' : wallet_payment_amount,
+                    'online_payment_amount' : online_payment_amount
+
+                    
+                }
+            
+            # Store the Razorpay order ID  and orderin session
+            request.session['razorpay_order_id'] = razorpay_order['id']
+            request.session['order_id'] = order_instance.id
+            request.session['wallet_payment_amount'] = float(wallet_payment_amount)
+            
+            return render(request, 'user_home/payment_wallet.html', context=context)
+
+
+
+#view function for cancelling an order item
+@login_required(login_url='login_page')
+@never_cache
+def user_cancel_order_item_view(request, order_number, item_id):
     
-    return render(request, 'user_home/payment.html', context=context)      
+    item = get_object_or_404(OrderProduct, id = item_id, order__user=request.user)
+    
+    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+
+    if item.order_item_status in ['Cancelled', 'Delivered', 'Returned']:
+        messages.error(request,"The Item cannot be cancelled in this stage")
+        return redirect('user_order_details', order_number)
+    
+    
+    
+    if request.method == 'POST':
+
+        if order.payment_method in ['Online','Wallet', 'Wallet with Online Payment']:
+            refund_amount = item.final_price
+            
+
+            try:
+                
+                with transaction.atomic():
+                    
+                    item.order_item_status = 'Cancelled'
+                    item.save()
+                    
+                    wallet, created = Wallet.objects.get_or_create(user=request.user)
+                    
+                    wallet.balance += refund_amount
+                    
+                    wallet.save()
+                    
+                    WalletTransaction.objects.create(
+                        wallet=wallet,
+                        transaction_type='CREDIT',
+                        amount=refund_amount,
+                        description=f'Refund for cancelled order item {item.product.product_name.name}-{item.product.size} in {order.order_number}'
+                    )
+                    
+                    messages.success(request, 'Cancellation of Item successful and amount refunded to your wallet.')
+
+
+            except Exception as e:
+                print(e)
+                messages.error(request, 'An error occurred while cancelling your order. Please try again.')
+        
+        else:
+            
+            item.order_item_status = 'Cancelled'
+            item.save()
+            
+            messages.success(request, 'Cancellation of Item successful.')
+
+        return redirect('user_order_details', order.order_number)
+    
+    return render(request, 'user_home/confirm_cancel_order_item.html',{'order':order, 'item':item})
+
+#view function for cancelling an order item
+@login_required(login_url='login_page')
+@never_cache
+def user_return_order_item_view(request, order_number, item_id):
+    
+    item = get_object_or_404(OrderProduct, id = item_id, order__user=request.user)
+    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+    
+    if item.order_item_status in ['Processing', 'Shipped', 'Cancelled', 'Returned']:
+        messages.error(request,"The item cannot be returned in this stage")
+        return redirect('user_order_details', order.order_number)
+    
+    if request.method == 'POST':
+
+        refund_amount = item.final_price
+
+        try:
+            
+            with transaction.atomic():              
+                
+                wallet, created = Wallet.objects.get_or_create(user=request.user)
+                
+                wallet.balance += refund_amount
+                wallet.save()
+
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    transaction_type='CREDIT',
+                    amount=refund_amount,
+                    description=f'Refund for returned order  item {item.product.product_name.name}-{item.product.size} in {order.order_number}'
+                )
+                
+                item.order_item_status = 'Returned'
+                item.save()
+
+                messages.success(request, 'Item Return Succesful and amount refunded to your wallet.')
+
+
+        except Exception as e:
+            messages.error(request, 'An error occurred while returning your order. Please try again.')
+
+        return redirect('user_order_details', order.order_number)
+    
+    return render(request, 'user_home/confirm_return_order.html',{'order':order, 'item' : item,})

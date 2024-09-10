@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y bg">
+
+    <div class="container">
+        <div class="row">
+        {% include 'user_home/user_dashboard.html' %}
+        <main class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Confirm Cancellation</h3>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to cancel the item {{item.product.product_name.name}}-{{item.product.size}} in the order {{order.order_number}}?</p>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Confirm </button>
+                        <a href="{% url 'user_order_details' order.order_number  %}" class="btn btn-secondary">Back</a>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div> <!-- row.// -->
+    </div>
+    
+    
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+    
+
+{% endblock %}
