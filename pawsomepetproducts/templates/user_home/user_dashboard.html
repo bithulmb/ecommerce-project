@@ -7,6 +7,7 @@
         <a class="list-group-item {% active_link 'user_orders' %}" href="{% url 'user_orders' %}"> My Orders </a>
         <a class="list-group-item {% active_link 'user_addresses || add_address || set_default_address || edit_address || delete_address' %}" href="{% url 'user_addresses' %}"> My Addresses </a>
         <a class="list-group-item {% active_link 'user_wallet' %}" href="{% url 'user_wallet' %}">Wallets </a>
+        <!-- <a class="list-group-item {% active_link 'request_mobile_otp || verify_mobile_otp' %}" href="{% url 'request_mobile_otp' %}">Mobile Verification </a> -->
     </ul>
     <br>
     <a class="btn btn-light btn-block link-danger" href="{% url 'logout_page' %}"> <i class="fa fa-power-off text-danger"></i> <span class=" h5 text text-danger">Log out</span> </a> 

@@ -1,5 +1,8 @@
 import random
 from django.core.mail import send_mail
+from twilio.rest import Client
+from django.conf import settings
+
 
 
 #functions to be used in views
@@ -17,3 +20,16 @@ def send_otp_email(email, otp):
     from_email = 'bithulmb07@gmail.com'
     recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
+
+
+def send_otp_mobile(mobile_number, otp):
+    client = Client(settings.ACCOUNT_SID, settings.AUTH_TOKEN)
+
+    message = f"Your OTP for Mobile verification is: {otp}"
+    mobile = "+91" + str(mobile_number) 
+    print(mobile)
+    client.messages.create(
+        body=message,
+        from_=settings.TWILIO_PHONE_NUMBER,
+        to=mobile
+    )

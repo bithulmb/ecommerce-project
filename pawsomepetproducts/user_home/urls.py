@@ -30,6 +30,10 @@ urlpatterns = [
     path('signup/', account_views.signup_view, name='signup_page'),
     path('verify-otp/', account_views.verify_otp_view, name='verify_otp'),
     path('resend-otp/', account_views.resend_otp_view, name='resend_otp'),
+
+        #mobile number verifiation
+    path('user/request-mobile-otp/', account_views.request_mobile_otp_view, name='request_mobile_otp'),
+    path('user/verify-mobile-otp/', account_views.verify_mobile_otp_view, name='verify_mobile_otp'),
     
 
 

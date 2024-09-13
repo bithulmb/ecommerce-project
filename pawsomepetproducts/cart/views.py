@@ -16,7 +16,6 @@ def _cart_id(request):
     return cart
 
 #view function to add products to cart
-
 def add_to_cart_view(request, variant_id):
     variant=Product_Variant.objects.get(id=variant_id)
 

@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from .models import CustomUser,Address
+from .models import CustomUser,Address, MobileOTP
 from django.db.models import Q
 from .forms import RegisterForm,CustomUserUpdateForm,UserProfileForm,AddAddressForm,OTPVerificationForm,LoginForm
 from django.contrib import messages
@@ -10,7 +10,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
-from .utils import generate_otp,send_otp_email
+from .utils import generate_otp,send_otp_email,send_otp_mobile
 from django.contrib.auth.hashers import make_password
 import time
 from django.contrib.admin.views.decorators import staff_member_required
@@ -29,7 +29,6 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 #-------------------------Admin side views----------------------------------
 
 #view function for listing the users in admin panel
-
 @superuser_required
 @never_cache
 def admin_users_view(request):
@@ -242,7 +241,7 @@ def resend_otp_view(request):
     
     return redirect('verify_otp')
 
-#view function forlogging out user
+#view function for logging out user
 @never_cache
 def logout_view(request):
     logout(request)
@@ -351,3 +350,42 @@ def user_delete_address_view(request,pk):
         messages.success(request, 'Address deleted successfully.')
         return redirect('user_addresses')
     return render(request, 'user_home/confirm_delete_address.html', {'address': object})
+
+#view function for requesting otp for mobile verification
+@login_required(login_url='login_page')
+def request_mobile_otp_view(request):
+    if request.method == 'POST':
+        mobile_number = request.POST.get('mobile_number')
+        otp = str(generate_otp())
+        
+        # Save OTP to database
+        otp_record = MobileOTP.objects.create(
+            user=request.user,
+            otp=otp,
+            mobile_number=mobile_number
+        )
+        
+        # Send OTP via SMS
+        send_otp_mobile(str(mobile_number), otp)
+        print("2")
+
+        messages.success(request, 'OTP has been sent to your mobile number.')
+        return redirect('verify_mobile_otp')
+    
+    return render(request, 'user_home/request_mobile_otp.html')
+
+#view function for verifying otp for mobile verification
+@login_required(login_url='login_page')
+def verify_mobile_otp_view(request):
+    if request.method == 'POST':
+        entered_otp = request.POST.get('otp')
+        try:
+            otp_record = MobileOTP.objects.get(user=request.user, otp=entered_otp, is_verified=False)
+            otp_record.is_verified = True
+            otp_record.save()
+            messages.success(request, 'Mobile number verified successfully!')
+            return redirect('request_mobile_otp')
+        except MobileOTP.DoesNotExist:
+            messages.error(request, 'Invalid OTP. Please try again.')
+
+    return render(request, 'user_home/verify_mobile_otp.html')

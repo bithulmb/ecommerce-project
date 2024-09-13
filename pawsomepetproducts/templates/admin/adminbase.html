@@ -63,10 +63,15 @@
                     </a>
                 </li>
 
-                <li class="menu-item {% active_link 'admin_orders || admin_edit_order' %}">
-                    <a class="menu-link" href="{% url 'admin_orders' %}"> <i class="icon material-icons md-shopping_cart"></i>
+                <li class="menu-item has-submenu {% active_link 'admin_orders || admin_edit_order' %}">
+                    <a class="menu-link" href=""> <i class="icon material-icons md-shopping_cart"></i>
                         <span class="text">Order Management</span>
                     </a>
+                    <div class="submenu">
+                        <a href="{% url 'admin_orders' %}">Order List</a>
+                        <a href="{% url 'admin_order_product_return' %}">Product Return Requests</a>
+                        
+                    </div>
                 </li>
 
 

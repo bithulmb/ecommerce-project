@@ -1,0 +1,103 @@
+{% extends 'admin/adminbase.html' %}
+
+{% block content %}
+
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Product Return Requests </h2>
+        </div>
+      
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <form action="{% url 'admin_order_product_return' %}" method="GET">
+                    <input type="text" placeholder="Search Products" name="q" value="{{request.GET.q}}" class="form-control">
+                    </form>
+                </div>
+                {% include 'alert_message.html' %}
+           
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Sl No</th>
+                            <th scope="col">User</th>
+                            <th scope="col">Order Number</th>
+                            <th scope="col">Product</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Product Price</th> 
+                            <th scope="col">Final Price After discount</th>                         
+                            <th scope="col">Status</th>
+                         
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order_items %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{ item.order.user }}</td>
+                            <td>{{ item.order }}</td>
+                            <td>{{ item.product}}</td>
+                            
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.product_price }}</td>
+                            <td>{{ item.final_price }}</td>
+                             
+
+                          
+                            <td >
+                                {% if item.order_item_status == "Return Requested" %}
+                                <a href="{% url 'admin_order_product_return_approve' item.id %}" class="btn btn-md rounded font-sm">Approve</a>
+                                {% elif item.order_item_status == "Returned" %}
+                                Returned
+                                {% endif %}
+                                
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div> <!-- table-responsive //end -->
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                {% if order_items.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ order_items.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                            <i class="material-icons md-chevron_left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+    
+                {% for i in order_items.paginator.page_range %}
+                    {% if order_items.number == i %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ i }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+    
+                {% if order_items.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ order_items.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                            <i class="material-icons md-chevron_right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+ 
+</section> <!-- content-main end// -->
+
+{% endblock %}

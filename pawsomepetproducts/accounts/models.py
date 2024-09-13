@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 import secrets
+from django.utils import timezone
 # Create your models here.
 
 class CustomUserManager(BaseUserManager):
@@ -53,6 +54,7 @@ class CustomUser(AbstractBaseUser):
     is_superadmin   =models.BooleanField(default=False)
     is_active       =models.BooleanField(default=True)
     is_blocked      =models.BooleanField(default=False)
+    
 
     USERNAME_FIELD  ='email'
     REQUIRED_FIELDS =['first_name','last_name']
@@ -86,3 +88,14 @@ class Address(models.Model):
     def __str__(self) -> str:
         return f"{self.address_line1},{self.town},{self.city}"
     
+
+class MobileOTP(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    mobile_number = models.CharField(max_length=15)
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    # expires_at = models.DateTimeField()
+    
+    # def is_valid(self):
+    #     return self.expires_at > timezone.now()

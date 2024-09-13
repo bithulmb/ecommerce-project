@@ -29,6 +29,7 @@
                 </div>
                 
                 <div class="col-md-3">
+                    {% if order_items.count > 1 %}
                     <div>
                        
                         {% if order.status == 'Processing' or order.status == 'Shipped' %}
@@ -36,10 +37,11 @@
                         <a href="{% url 'user_cancel_order' order.order_number %}" class="btn btn-danger">Cancel Order</a>
                         {% endif %}
                         
-                        {% if order.status == 'Delivered' %}
+                        <!-- {% if order.status == 'Delivered' %}
                         <a href="{% url 'user_return_order' order.order_number %}" class="btn btn-danger">Return Order</a>
-                        {% endif %}    
+                        {% endif %}     -->
                     </div>
+                    {% endif %}
                    
                 </div>
             
@@ -82,20 +84,18 @@
                             <td>₹ {{ item.product_price }}</td>
                             <td>₹ {{ item.subtotal }}</td>
                             
-                            {% if order_items.count > 1 %}
+                            
                             <td>{% if item.order_item_status == 'Processing' or item.order_item_status == 'Shipped' %}
 
                                 <a href="{% url 'user_cancel_order_item' order.order_number item.id %}" class="btn btn-outline-danger btn-sm">Cancel Item</a>                                
                      
                                 {% elif item.order_item_status == 'Delivered' %}
                                 <a href="{% url 'user_return_order_item' order.order_number item.id %}" class="btn btn-outline-danger btn-sm">Return Item</a>
-                                {% elif item.order_item_status == 'Cancelled' %}
-                                Cancelled
-                                {% elif item.order_item_status == 'Returned' %}
-                                Returned
+                                {% else %}
+                                {{ item.order_item_status }}
                                 {% endif %}
                             </td>
-                            {% endif %}
+                            
                         </tr>
                         {% endfor %}
                     </tbody>

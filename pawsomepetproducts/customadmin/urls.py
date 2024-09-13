@@ -46,6 +46,8 @@ urlpatterns = [
     # order related urls from order app
     path('admin-panel/orders/', order_views.admin_orders_view, name='admin_orders'),
     path('admin-panel/orders/<int:order_id>/', order_views.admin_order_details_view, name='admin_order_details'),
+    path('admin-panel/orders/product-return', order_views.admin_order_product_return_view, name='admin_order_product_return'),
+   path('admin-panel/orders/product-return/<int:order_item_id>/approve', order_views.admin_order_product_return_approve_view, name='admin_order_product_return_approve'),
 
     #coupon related urls from coupon app
     path('admin-panel/coupons/', coupon_views.admin_coupons_view, name='admin_coupons'),

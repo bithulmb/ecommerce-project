@@ -81,6 +81,67 @@ def admin_order_details_view(request, order_id):
                }
     return render(request, 'admin/admin_order_detail.html', context )
 
+#view for listing the product return requests
+@superuser_required
+@never_cache
+def admin_order_product_return_view(request):
+
+    query=request.GET.get('q')
+    if query:   #if there is search query
+        order_items=OrderProduct.objects.filter(Q(order_item_status = "Returned") | Q(order_item_status = "Return Requested")).filter(product__product_name__name__icontains=query) 
+    else:
+        order_items=OrderProduct.objects.filter(Q(order_item_status = "Returned") | Q(order_item_status = "Return Requested")).order_by('-id')
+    
+    #for pagination
+    paginator = Paginator(order_items, 8) 
+    page = request.GET.get('page')
+    try:
+        order_items = paginator.page(page)
+    except PageNotAnInteger:
+        order_items = paginator.page(1)
+    except EmptyPage:
+        order_items = paginator.page(paginator.num_pages)
+
+    return render(request, 'admin/admin_order_product_return.html',{'order_items' : order_items})
+
+#view for approving the order item return view
+@superuser_required
+@never_cache
+def admin_order_product_return_approve_view(request, order_item_id):
+
+    item = get_object_or_404(OrderProduct, id = order_item_id)
+    
+    
+    customer = item.order.user
+    refund_amount = item.final_price
+    try:
+        
+        with transaction.atomic():              
+            
+            wallet, created = Wallet.objects.get_or_create(user = customer)
+            
+            wallet.balance += refund_amount
+            wallet.save()
+
+            WalletTransaction.objects.create(
+                wallet=wallet,
+                transaction_type='CREDIT',
+                amount=refund_amount,
+                description=f'Refund for returned order  item {item.product.product_name.name}-{item.product.size} in {item.order.order_number}'
+            )
+            
+            item.order_item_status = 'Returned'
+            item.save()
+
+            messages.success(request, 'Item Return approved and amount refunded to user wallet.')
+
+
+    except Exception as e:
+        print(e)
+        messages.error(request, 'An error occurred while approving return of order. Please try again.')
+
+    return redirect('admin_order_product_return')
+
 
 # -------------------------------user views-------------------------------
 #view function for checkoout page
@@ -1075,7 +1136,8 @@ def user_cancel_order_item_view(request, order_number, item_id):
     
     return render(request, 'user_home/confirm_cancel_order_item.html',{'order':order, 'item':item})
 
-#view function for cancelling an order item
+
+#view function for returning an order item
 @login_required(login_url='login_page')
 @never_cache
 def user_return_order_item_view(request, order_number, item_id):
@@ -1083,39 +1145,18 @@ def user_return_order_item_view(request, order_number, item_id):
     item = get_object_or_404(OrderProduct, id = item_id, order__user=request.user)
     order = get_object_or_404(Order, order_number=order_number, user=request.user)
     
-    if item.order_item_status in ['Processing', 'Shipped', 'Cancelled', 'Returned']:
+    if item.order_item_status in ['Processing', 'Shipped', 'Cancelled', 'Return Requested', 'Returned']:
         messages.error(request,"The item cannot be returned in this stage")
         return redirect('user_order_details', order.order_number)
     
     if request.method == 'POST':
 
-        refund_amount = item.final_price
+        item.order_item_status = 'Return Requested'
+        item.save()
 
-        try:
-            
-            with transaction.atomic():              
-                
-                wallet, created = Wallet.objects.get_or_create(user=request.user)
-                
-                wallet.balance += refund_amount
-                wallet.save()
-
-                WalletTransaction.objects.create(
-                    wallet=wallet,
-                    transaction_type='CREDIT',
-                    amount=refund_amount,
-                    description=f'Refund for returned order  item {item.product.product_name.name}-{item.product.size} in {order.order_number}'
-                )
-                
-                item.order_item_status = 'Returned'
-                item.save()
-
-                messages.success(request, 'Item Return Succesful and amount refunded to your wallet.')
-
-
-        except Exception as e:
-            messages.error(request, 'An error occurred while returning your order. Please try again.')
-
+        messages.success(request, 'Item Return Request Submitted.  \n You will get the amount refunded to your wallet when the product is returned ')
         return redirect('user_order_details', order.order_number)
-    
-    return render(request, 'user_home/confirm_return_order.html',{'order':order, 'item' : item,})
+ 
+            
+    return render(request, 'user_home/confirm_return_order_item.html',{'order':order, 'item' : item,})
+

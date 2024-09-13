@@ -82,6 +82,7 @@ class OrderProduct(models.Model):
         ('Shipped', 'Shipped'),
         ('Delivered', 'Delivered'),
         ('Cancelled', 'Cancelled'),
+        ('Return Requested', 'Return Requested'),
         ('Returned', 'Returned'),
      
     )

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block csslinking %}
+
+     <style>
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+        .is-invalid {
+            border-color: red;
+        }
+    </style>
+
+{% endblock %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y bg">
+
+    <div class="container">
+        <div class="row">
+            {% include 'user_home/user_dashboard.html' %}
+        <main class="col-md-9">
+            <article class="card" >
+            <div class="card-body">
+                <!-- Alert box for displaying messages -->
+               {% include 'alert_message.html' %}
+                <header class=""><h2 class=" text-center ">Verify Mobile OTP</h2></header>
+                
+                <div class="container mt-5">
+                    <form id="otpForm" method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="otp">Enter OTP:</label>
+                            <input type="text" id="otp" name="otp" class="form-control" required>
+                            <small id="otpError" class="error"></small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Verify OTP</button>
+                    </form>
+                </div>
+           
+            </div> <!-- card-body .// -->
+            </article> <!-- order-group.// --> 
+        </main>
+    </div> <!-- row.// -->
+    </div>
+    
+    
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+    
+    <script>
+        document.getElementById('otpForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting immediately
+
+            // Get the OTP input value
+            const otpInput = document.getElementById('otp');
+            const otp = otpInput.value.trim();
+            const errorElement = document.getElementById('otpError');
+
+            // Regular expression for validating OTP (e.g., 6 digits only)
+            const otpPattern = /^[0-9]{6}$/; // Modify according to your OTP requirements (e.g., 6 digits)
+
+            // Validate the OTP
+            if (!otpPattern.test(otp)) {
+                // Show error message if the OTP is not valid
+                errorElement.textContent = 'Please enter a valid 6-digit OTP.';
+                otpInput.classList.add('is-invalid');
+            } else {
+                // Clear any previous errors
+                errorElement.textContent = '';
+                otpInput.classList.remove('is-invalid');
+
+                // Submit the form if validation passes
+                this.submit();
+            }
+        });
+    </script>
+    {% endblock %}
