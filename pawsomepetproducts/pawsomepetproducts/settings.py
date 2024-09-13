@@ -78,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware', # for social authentication
+    'accounts.middleware.BlockUserMiddleware', #custom middleware added to logout user after he is blocked
 ]
 
 ROOT_URLCONF = 'pawsomepetproducts.urls'

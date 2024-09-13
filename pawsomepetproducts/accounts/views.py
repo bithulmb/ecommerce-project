@@ -36,7 +36,7 @@ def admin_users_view(request):
     if query:   #if there is search query
         users=CustomUser.objects.filter(is_superadmin = False).filter(Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query))
     else:
-        users=CustomUser.objects.filter(is_superadmin = False)
+        users=CustomUser.objects.filter(is_superadmin = False).order_by('-id')
 
     #for including paginator
     paginator = Paginator(users, 8) 
