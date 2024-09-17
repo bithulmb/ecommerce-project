@@ -6,20 +6,20 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0003_order_is_ordered_order_payment_method'),
+        ("orders", "0003_order_is_ordered_order_payment_method"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='orderproduct',
-            name='order',
+            model_name="orderproduct",
+            name="order",
         ),
         migrations.RemoveField(
-            model_name='orderproduct',
-            name='ordered',
+            model_name="orderproduct",
+            name="ordered",
         ),
         migrations.RemoveField(
-            model_name='orderproduct',
-            name='user',
+            model_name="orderproduct",
+            name="user",
         ),
     ]

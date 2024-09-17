@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Wallet,WalletTransaction
+
+from .models import Wallet, WalletTransaction
 
 # Register your models here.
 

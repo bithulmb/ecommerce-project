@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0007_customuser_is_blocked'),
+        ("accounts", "0007_customuser_is_blocked"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='address',
-            name='name',
+            model_name="address",
+            name="name",
             field=models.CharField(max_length=30, null=True),
         ),
     ]

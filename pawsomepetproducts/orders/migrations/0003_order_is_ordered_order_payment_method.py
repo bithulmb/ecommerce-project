@@ -6,18 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0002_remove_order_ip_remove_order_is_ordered'),
+        ("orders", "0002_remove_order_ip_remove_order_is_ordered"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='is_ordered',
+            model_name="order",
+            name="is_ordered",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='order',
-            name='payment_method',
-            field=models.CharField(choices=[('Online', 'Online'), ('Cash On Delivery', 'Cash On Delivery')], max_length=30, null=True),
+            model_name="order",
+            name="payment_method",
+            field=models.CharField(
+                choices=[
+                    ("Online", "Online"),
+                    ("Cash On Delivery", "Cash On Delivery"),
+                ],
+                max_length=30,
+                null=True,
+            ),
         ),
     ]

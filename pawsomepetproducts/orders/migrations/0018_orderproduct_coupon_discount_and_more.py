@@ -6,33 +6,44 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0017_orderproduct_order_item_status'),
+        ("orders", "0017_orderproduct_order_item_status"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='orderproduct',
-            name='coupon_discount',
+            model_name="orderproduct",
+            name="coupon_discount",
             field=models.DecimalField(decimal_places=2, max_digits=8, null=True),
         ),
         migrations.AddField(
-            model_name='orderproduct',
-            name='final_price',
+            model_name="orderproduct",
+            name="final_price",
             field=models.DecimalField(decimal_places=2, max_digits=8, null=True),
         ),
         migrations.AddField(
-            model_name='orderproduct',
-            name='offer_discount',
+            model_name="orderproduct",
+            name="offer_discount",
             field=models.DecimalField(decimal_places=2, max_digits=8, null=True),
         ),
         migrations.AddField(
-            model_name='orderproduct',
-            name='offer_price',
+            model_name="orderproduct",
+            name="offer_price",
             field=models.DecimalField(decimal_places=2, max_digits=8, null=True),
         ),
         migrations.AlterField(
-            model_name='orderproduct',
-            name='order_item_status',
-            field=models.CharField(choices=[('Processing', 'Processing'), ('Shipped', 'Shipped'), ('Delivered', 'Delivered'), ('Cancelled', 'Cancelled'), ('Returned', 'Returned')], default='Processing', max_length=20, null=True),
+            model_name="orderproduct",
+            name="order_item_status",
+            field=models.CharField(
+                choices=[
+                    ("Processing", "Processing"),
+                    ("Shipped", "Shipped"),
+                    ("Delivered", "Delivered"),
+                    ("Cancelled", "Cancelled"),
+                    ("Returned", "Returned"),
+                ],
+                default="Processing",
+                max_length=20,
+                null=True,
+            ),
         ),
     ]

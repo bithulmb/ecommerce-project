@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import ProductVariantOffer, CategoryOffer
+
+from .models import CategoryOffer, ProductVariantOffer
 
 # Register your models here.
 admin.site.register(ProductVariantOffer)
