@@ -32,8 +32,8 @@ from .utils import generate_otp, send_otp_email, send_otp_mobile
 
 
 # view function for listing the users in admin panel
-@superuser_required
 @never_cache
+@superuser_required
 def admin_users_view(request):
     query = request.GET.get("q")
     if query:  # if there is search query
