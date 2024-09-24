@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'active_link', #addedto make menu links active when it is selected
+    'whitenoise.runserver_nostatic' # for collecting static files
     
     #local
     'user_home',
@@ -72,6 +73,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # added to collect static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -80,6 +82,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware', # for social authentication
     'accounts.middleware.BlockUserMiddleware', #custom middleware added to logout user after he is blocked
+    
 ]
 
 ROOT_URLCONF = 'pawsomepetproducts.urls'
@@ -174,7 +177,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     ]
-
+STATIC_ROOT = "/var/www/pawsomepetproducts/static/"
 
 
 #Media files configuration
