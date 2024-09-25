@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'active_link', #addedto make menu links active when it is selected
-    'whitenoise.runserver_nostatic' # for collecting static files
+    'whitenoise.runserver_nostatic', # for collecting static files
     
     #local
     'user_home',
