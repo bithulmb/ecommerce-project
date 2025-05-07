@@ -204,6 +204,7 @@
                             <form id="order-form" action="{% url 'place_order' %}" method="POST">
                                 {% csrf_token %}
                                 <div class="row">
+                                    {% if addresses %}
                                     {% for address in addresses %}
                                     <div class="col-md-4">
                                         <div class="card mb-3" style="height: 180px;">
@@ -222,9 +223,17 @@
                                         </div>
                                     </div>
                                     {% endfor %}
+                                    <a href="{% url 'add_address_order' %}"><p class="h5 my-4">Add A New Address</p></a>
+                                {% else %}
+                                    <div class="col-md-12">
+                                        <div class="alert alert-warning mt-3">
+                                            <p>No saved addresses found.</p> <a href="{% url 'add_address_order' %}">Click here to add a new address</a> before proceeding with the order.
+                                        </div>
+                                    </div>
+                                {% endif %}
                                 </div>
                                 
-                                <a href="{% url 'add_address_order' %}"><p class="h5 my-4">Add A New Address</p></a>
+                              
 
                     </div>
                 </article>
@@ -247,18 +256,23 @@
                             <input type="radio" name="payment_method" id="online" value="online" required>
                             <label for="online">Online</label><br>
                         </div>
-                        {% if wallet.balance >= 0 %}
+                        {% if wallet.balance > 0 %}
 
                         <div class="m-3">
                             <input type="radio" name="payment_method" id="wallet" value="wallet" required>
                             <label for="wallet">Wallet ( Balance : {{wallet.balance}})</label><br>
                         </div>
                         {% endif %}
+                        {% if addresses %}
                         <button type="submit" form="order-form" class="btn btn-primary btn-block">Continue</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-primary btn-block" disabled>Continue</button>
+                    {% endif %}
+                       
                     </form>
                     </div>
-                </div>
-            </article>
+                    </div>
+                </article>
                 </div>
             </aside>
         </div>

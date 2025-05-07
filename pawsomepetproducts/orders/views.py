@@ -26,6 +26,7 @@ from product.models import Product_Variant
 from wallet.models import Wallet, WalletTransaction
 
 from .models import Order, OrderAddress, OrderProduct, Payment
+from .utils import generate_order_number,create_order,create_order_address,create_payment,create_order_products
 
 client = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
 
@@ -246,8 +247,14 @@ def place_order_view(request):
     if request.method == "POST":
         address_id = request.POST.get("address_id")
         payment_method = request.POST.get("payment_method")
-        address = Address.objects.get(id=address_id)
 
+        if not address_id or not payment_method:
+            messages.error(request, "Please provide address and payment method.")
+            return redirect("checkout")
+        
+        address = Address.objects.get(id=address_id, user = current_user)
+        
+        
         # if the user has selected cash on delivery option in payment method
         if payment_method == "cash_on_delivery":
 
@@ -255,98 +262,42 @@ def place_order_view(request):
                 with transaction.atomic():
 
                     # creating an orderaddress instance
-                    order_address = OrderAddress.objects.create(
-                        name=address.name,
-                        address_line1=address.address_line1,
-                        address_line2=address.address_line2,
-                        town=address.town,
-                        city=address.city,
-                        state=address.state,
-                        pincode=address.pincode,
-                        contact_number=address.contact_number,
-                    )
+                    order_address = create_order_address(address)
+                 
+                    # creating an order instance 
+                    order_instance = create_order(
+                        user = current_user,
+                        order_address = order_address,
+                        order_total = total,
+                        offer_amount=offer_discount,
+                        shipping_charge=shipping_charge,
+                        total_amount = grand_total,
+                        payment_method= "Cash On Delivery",
+                        coupon=coupon,
+                        discount = discount                      
+                    )                
 
-                    # creating an order instance and saving
-                    order_instance = Order()
-                    order_instance.user = current_user
-                    order_instance.order_address = order_address
-                    order_instance.order_total = total
-                    order_instance.offer_amount = offer_discount
-                    order_instance.shipping_charge = shipping_charge
-                    order_instance.total_amount = grand_total
-                    order_instance.payment_method = "Cash On Delivery"
-
-                    if coupon and discount:
-                        order_instance.coupon = coupon
-                        order_instance.discount_amount = discount
-
-                    order_instance.save()
-
-                    # Generate order number
-                    yr = int(datetime.date.today().strftime("%Y"))
-                    dt = int(datetime.date.today().strftime("%d"))
-                    mt = int(datetime.date.today().strftime("%m"))
-                    d = datetime.date(yr, mt, dt)
-                    current_date = d.strftime("%y%m%d")
-                    order_number = current_date + str(order_instance.id)
-                    order_instance.order_number = order_number
-                    order_instance.save()
-
-                    # creating an instance of payment and saving
-                    payment_instance = Payment(
+                    # creating an instance of payment
+                    payment_instance = create_payment(
                         user=current_user,
-                        payment_id=order_number,
+                        payment_id = order_instance.order_number,
                         payment_method="Cash On Delivery",
-                        amount_paid=grand_total,
-                        status="Pending",
-                    )
-                    payment_instance.save()
+                        amount_paid = grand_total,
+                        status = "Pending",
+                    )                
 
                     # saving the payment method to order instance
                     order_instance.payment = payment_instance
                     order_instance.is_ordered = True
                     order_instance.save()
 
-                    # move the cart items to order product table
-                    for item in cart_items:
-                        order_product_instance = OrderProduct()
-                        order_product_instance.order = order_instance
-                        order_product_instance.payment = payment_instance
-                        order_product_instance.product = item.variant
-                        order_product_instance.quantity = item.quantity
-                        order_product_instance.product_price = item.variant.price
-
-                        order_product_instance.offer_discount = (
-                            item.variant.discount_amount()
-                            * order_product_instance.quantity
+                    #creating order products from cart items and reduccing the count of stock
+                    create_order_products(
+                        cart_items=cart_items,
+                        order=order_instance,
+                        payment=payment_instance
                         )
-                        order_product_instance.offer_price = (
-                            item.variant.get_offer_price()
-                            * order_product_instance.quantity
-                        )
-                        if order_instance.coupon:
-                            item_percentage = (order_product_instance.offer_price) / (
-                                order_instance.order_total
-                                - order_instance.offer_amount
-                                + order_instance.shipping_charge
-                            )
-                            item_coupon_discount = (
-                                order_instance.discount_amount * item_percentage
-                            )
-                        else:
-                            item_coupon_discount = 0
-                        order_product_instance.coupon_discount = item_coupon_discount
-                        order_product_instance.final_price = (
-                            order_product_instance.offer_price
-                        ) - order_product_instance.coupon_discount
-
-                        order_product_instance.save()
-
-                        # reduce the number of stock of product
-                        product = Product_Variant.objects.get(id=item.variant.id)
-                        product.stock -= item.quantity
-                        product.save()
-
+                  
                     # clearing the cart of the user
                     cart_items.delete()
 
@@ -362,7 +313,7 @@ def place_order_view(request):
                 messages.error(
                     request, "An error occurred while ordering. Please try again."
                 )
-                return redirect("checkout")
+                return redirect("checkout_page")
 
         if payment_method == "online":
             # authorize razorpay client with API Keys.
@@ -372,45 +323,26 @@ def place_order_view(request):
             amount = int(grand_total * 100)  # Convert to paisa
 
             # creating an orderaddress instance
-            order_address = OrderAddress.objects.create(
-                name=address.name,
-                address_line1=address.address_line1,
-                address_line2=address.address_line2,
-                town=address.town,
-                city=address.city,
-                state=address.state,
-                pincode=address.pincode,
-                contact_number=address.contact_number,
-            )
+            order_address = create_order_address(address)
+          
 
-            # creating an order instance and saving
-            order_instance = Order()
-            order_instance.user = current_user
-            order_instance.order_address = order_address
-            order_instance.order_total = total
-            order_instance.offer_amount = offer_discount
-            order_instance.shipping_charge = shipping_charge
-            order_instance.total_amount = grand_total
-            order_instance.payment_method = "Online"
-            if coupon and discount:
-                order_instance.coupon = coupon
-                order_instance.discount_amount = discount
-            order_instance.save()
-
-            # Generate order number
-            yr = int(datetime.date.today().strftime("%Y"))
-            dt = int(datetime.date.today().strftime("%d"))
-            mt = int(datetime.date.today().strftime("%m"))
-            d = datetime.date(yr, mt, dt)
-            current_date = d.strftime("%y%m%d")
-            order_number = current_date + str(order_instance.id)
-            order_instance.order_number = order_number
-            order_instance.save()
+             # creating an order instance 
+            order_instance = create_order(
+                user = current_user,
+                order_address = order_address,
+                order_total = total,
+                offer_amount=offer_discount,
+                shipping_charge=shipping_charge,
+                total_amount = grand_total,
+                payment_method= "Online",
+                coupon=coupon,
+                discount = discount                      
+            )      
 
             data = {
                 "amount": amount,
                 "currency": "INR",
-                "receipt": order_number,
+                "receipt": order_instance.order_number,
                 "payment_capture": "1",
             }
 
@@ -444,53 +376,33 @@ def place_order_view(request):
             if wallet.balance >= grand_total:
                 try:
                     with transaction.atomic():
-
+                        
                         # creating an orderaddress instance
-                        order_address = OrderAddress.objects.create(
-                            name=address.name,
-                            address_line1=address.address_line1,
-                            address_line2=address.address_line2,
-                            town=address.town,
-                            city=address.city,
-                            state=address.state,
-                            pincode=address.pincode,
-                            contact_number=address.contact_number,
-                        )
+                        order_address = create_order_address(address)
 
-                        # creating an order instance and saving
-                        order_instance = Order()
-                        order_instance.user = current_user
-                        order_instance.order_address = order_address
-                        order_instance.order_total = total
-                        order_instance.offer_amount = offer_discount
-                        order_instance.shipping_charge = shipping_charge
-                        order_instance.total_amount = grand_total
-                        order_instance.payment_method = "Wallet"
-                        if coupon and discount:
-                            order_instance.coupon = coupon
-                            order_instance.discount_amount = discount
-                        order_instance.save()
-
-                        # Generate order number
-                        yr = int(datetime.date.today().strftime("%Y"))
-                        dt = int(datetime.date.today().strftime("%d"))
-                        mt = int(datetime.date.today().strftime("%m"))
-                        d = datetime.date(yr, mt, dt)
-                        current_date = d.strftime("%y%m%d")
-                        order_number = current_date + str(order_instance.id)
-                        order_instance.order_number = order_number
-                        order_instance.save()
-
-                        # creating an instance of payment and saving
-                        payment_instance = Payment(
-                            user=current_user,
-                            payment_id=order_number,
+                        # creating an order instance 
+                        order_instance = create_order(
+                            user = current_user,
+                            order_address = order_address,
+                            order_total = total,
+                            offer_amount=offer_discount,
+                            shipping_charge=shipping_charge,
+                            total_amount = grand_total,
                             payment_method="Wallet",
-                            amount_paid=grand_total,
-                            status="Completed",
+                            coupon=coupon,
+                            discount = discount                      
                         )
-                        payment_instance.save()
 
+                         # creating an instance of payment
+                        payment_instance = create_payment(
+                            user=current_user,
+                            payment_id = order_instance.order_number,
+                            payment_method="Wallet",
+                            amount_paid = grand_total,
+                            status = "Completed",
+                        )        
+
+                      
                         # subtracting the balance of wallet and creating a transaction
                         wallet.balance -= grand_total
                         wallet.save()
@@ -498,7 +410,7 @@ def place_order_view(request):
                             wallet=wallet,
                             transaction_type="DEBIT",
                             amount=grand_total,
-                            description=f"Paid for order {order_number}",
+                            description=f"Paid for order {order_instance.order_number}",
                         )
 
                         # saving the payment method to order instance
@@ -506,49 +418,12 @@ def place_order_view(request):
                         order_instance.is_ordered = True
                         order_instance.save()
 
-                        # move the cart items to order product table
-                        for item in cart_items:
-                            order_product_instance = OrderProduct()
-                            order_product_instance.order = order_instance
-                            order_product_instance.payment = payment_instance
-                            order_product_instance.product = item.variant
-                            order_product_instance.quantity = item.quantity
-                            order_product_instance.product_price = item.variant.price
-
-                            order_product_instance.offer_discount = (
-                                item.variant.discount_amount()
-                                * order_product_instance.quantity
+                        #creating order products from cart items and reduccing the count of stock
+                        create_order_products(
+                            cart_items=cart_items,
+                            order=order_instance,
+                            payment=payment_instance
                             )
-                            order_product_instance.offer_price = (
-                                item.variant.get_offer_price()
-                                * order_product_instance.quantity
-                            )
-                            if order_instance.coupon:
-                                item_percentage = (
-                                    order_product_instance.offer_price
-                                ) / (
-                                    order_instance.order_total
-                                    - order_instance.offer_amount
-                                    + order_instance.shipping_charge
-                                )
-                                item_coupon_discount = (
-                                    order_instance.discount_amount * item_percentage
-                                )
-                            else:
-                                item_coupon_discount = 0
-                            order_product_instance.coupon_discount = (
-                                item_coupon_discount
-                            )
-                            order_product_instance.final_price = (
-                                order_product_instance.offer_price
-                            ) - order_product_instance.coupon_discount
-
-                            order_product_instance.save()
-
-                            # reduce the number of stock of product
-                            product = Product_Variant.objects.get(id=item.variant.id)
-                            product.stock -= item.quantity
-                            product.save()
 
                         # clearing the cart of the user
                         cart_items.delete()
@@ -565,45 +440,26 @@ def place_order_view(request):
                     messages.error(
                         request, "An error occurred while ordering. Please try again."
                     )
-                    return redirect("checkout")
+                    print(e)
+                    return redirect("checkout_page")
 
             if wallet.balance > 0:
 
                 # creating an orderaddress instance
-                order_address = OrderAddress.objects.create(
-                    name=address.name,
-                    address_line1=address.address_line1,
-                    address_line2=address.address_line2,
-                    town=address.town,
-                    city=address.city,
-                    state=address.state,
-                    pincode=address.pincode,
-                    contact_number=address.contact_number,
-                )
+                order_address = create_order_address(address)
 
-                # creating an order instance and saving
-                order_instance = Order()
-                order_instance.user = current_user
-                order_instance.order_address = order_address
-                order_instance.order_total = total
-                order_instance.offer_amount = offer_discount
-                order_instance.shipping_charge = shipping_charge
-                order_instance.total_amount = grand_total
-                order_instance.payment_method = "Wallet with Online Payment"
-                if coupon and discount:
-                    order_instance.coupon = coupon
-                    order_instance.discount_amount = discount
-                order_instance.save()
-
-                # Generate order number
-                yr = int(datetime.date.today().strftime("%Y"))
-                dt = int(datetime.date.today().strftime("%d"))
-                mt = int(datetime.date.today().strftime("%m"))
-                d = datetime.date(yr, mt, dt)
-                current_date = d.strftime("%y%m%d")
-                order_number = current_date + str(order_instance.id)
-                order_instance.order_number = order_number
-                order_instance.save()
+                # creating an order instance 
+                order_instance = create_order(
+                        user = current_user,
+                        order_address = order_address,
+                        order_total = total,
+                        offer_amount=offer_discount,
+                        shipping_charge=shipping_charge,
+                        total_amount = grand_total,
+                        payment_method= "Wallet with Online Payment",
+                        coupon=coupon,
+                        discount = discount                      
+                    )         
 
                 wallet_payment_amount = wallet.balance
                 online_payment_amount = grand_total - wallet_payment_amount
@@ -619,7 +475,7 @@ def place_order_view(request):
                 data = {
                     "amount": amount,
                     "currency": "INR",
-                    "receipt": order_number,
+                    "receipt": order_instance.order_number,
                     "payment_capture": "1",
                 }
 
@@ -672,6 +528,7 @@ def wallet_payment_status(request):
                 # payment successful, save payment details
                 order_id = request.session.get("order_id")
                 order_instance = Order.objects.get(id=order_id)
+              
 
                 # creating an instance of payment and saving
                 payment_instance = Payment(
@@ -710,43 +567,12 @@ def wallet_payment_status(request):
                 # getting the items in cart
                 cart_items = CartItem.objects.filter(user=request.user)
 
-                # move the cart items to order product table
-                for item in cart_items:
-                    order_product_instance = OrderProduct()
-                    order_product_instance.order = order_instance
-                    order_product_instance.payment = payment_instance
-                    order_product_instance.product = item.variant
-                    order_product_instance.quantity = item.quantity
-                    order_product_instance.product_price = item.variant.price
-
-                    order_product_instance.offer_discount = (
-                        item.variant.discount_amount() * order_product_instance.quantity
-                    )
-                    order_product_instance.offer_price = (
-                        item.variant.get_offer_price() * order_product_instance.quantity
-                    )
-                    if order_instance.coupon:
-                        item_percentage = (order_product_instance.offer_price) / (
-                            order_instance.order_total
-                            - order_instance.offer_amount
-                            + order_instance.shipping_charge
+                #creating order products from cart items and reduccing the count of stock
+                create_order_products(
+                        cart_items=cart_items,
+                        order=order_instance,
+                        payment=payment_instance
                         )
-                        item_coupon_discount = (
-                            order_instance.discount_amount * item_percentage
-                        )
-                    else:
-                        item_coupon_discount = 0
-                    order_product_instance.coupon_discount = item_coupon_discount
-                    order_product_instance.final_price = (
-                        order_product_instance.offer_price
-                    ) - order_product_instance.coupon_discount
-
-                    order_product_instance.save()
-
-                    # reduce the number of stock of product
-                    product = Product_Variant.objects.get(id=item.variant.id)
-                    product.stock -= item.quantity
-                    product.save()
 
                 # clearing the cart of the user
                 cart_items.delete()
@@ -805,42 +631,13 @@ def payment_status(request):
 
             # getting the items in cart
             cart_items = CartItem.objects.filter(user=request.user)
-
-            # move the cart items to order product table
-            for item in cart_items:
-                order_product_instance = OrderProduct()
-                order_product_instance.order = order_instance
-                order_product_instance.payment = payment_instance
-                order_product_instance.product = item.variant
-                order_product_instance.quantity = item.quantity
-                order_product_instance.product_price = item.variant.price
-                order_product_instance.offer_discount = (
-                    item.variant.discount_amount() * order_product_instance.quantity
-                )
-                order_product_instance.offer_price = (
-                    item.variant.get_offer_price() * order_product_instance.quantity
-                )
-                if order_instance.coupon:
-                    item_percentage = (order_product_instance.offer_price) / (
-                        order_instance.order_total
-                        - order_instance.offer_amount
-                        + order_instance.shipping_charge
-                    )
-                    item_coupon_discount = (
-                        order_instance.discount_amount * item_percentage
-                    )
-                else:
-                    item_coupon_discount = 0
-                order_product_instance.coupon_discount = item_coupon_discount
-                order_product_instance.final_price = (
-                    order_product_instance.offer_price
-                ) - order_product_instance.coupon_discount
-                order_product_instance.save()
-
-                # reduce the number of stock of product
-                product = Product_Variant.objects.get(id=item.variant.id)
-                product.stock -= item.quantity
-                product.save()
+            
+            #creating order products from cart items and reduccing the count of stock
+            create_order_products(
+                        cart_items=cart_items,
+                        order=order_instance,
+                        payment=payment_instance
+                        )            
 
             # clearing the cart of the user
             cart_items.delete()
@@ -1158,9 +955,7 @@ def user_cancel_order_item_view(request, order_number, item_id):
                     item.save()
 
                     wallet, created = Wallet.objects.get_or_create(user=request.user)
-
                     wallet.balance += refund_amount
-
                     wallet.save()
 
                     WalletTransaction.objects.create(
