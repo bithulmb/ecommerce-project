@@ -252,3 +252,5 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 ACCOUNT_SID=config('ACCOUNT_SID')
 AUTH_TOKEN=config('AUTH_TOKEN')
 TWILIO_PHONE_NUMBER=config('TWILIO_PHONE_NUMBER')
+
+SOCIALACCOUNT_LOGIN_ON_GET = True #to prevent django all auth intermediate page while google sign in
