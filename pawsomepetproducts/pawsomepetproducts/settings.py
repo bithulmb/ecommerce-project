@@ -254,3 +254,6 @@ AUTH_TOKEN=config('AUTH_TOKEN')
 TWILIO_PHONE_NUMBER=config('TWILIO_PHONE_NUMBER')
 
 SOCIALACCOUNT_LOGIN_ON_GET = True #to prevent django all auth intermediate page while google sign in
+
+BASE_URL = config("BASE_URL", default="http://127.0.0.1:8000")
+RAZORPAY_CALLBACK_URL = f"{BASE_URL}/user/payment/status"

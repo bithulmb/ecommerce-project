@@ -34,18 +34,18 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 var options = {
-    "key": "{{ settings.RAZOR_KEY_ID }}", // Enter the Key ID generated from the Dashboard
-    "amount": "{{amount}}", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    "key": "{{ RAZOR_KEY_ID }}", 
+    "amount": "{{amount}}", // amount is in paisa
     "currency": "INR",
-    "name": "Pawsome Pet Products", //your business name
+    "name": "Pawsome Pet Products", 
     "description": " Transcations Testing",
     "image": "{% static 'user/images/logo.png' %}",
-    "order_id": "{{order_id}}", //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-    "callback_url": "https://www.pawsomepetproducts.shop/user/wallet_payment/status",
-    "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
-        "name": "{{user.first_name}}", //your customer's name
+    "order_id": "{{order_id}}", 
+    "callback_url": "{{ RAZORPAY_CALLBACK_URL }}",
+    "prefill": { 
+        "name": "{{user.first_name}}", 
         "email": "{{user.email}}",
-        "contact": "{{user.phone_number}}" //Provide the customer's phone number for better conversion rates 
+        "contact": "{{user.phone_number}}"
     },
     "notes": {
         "address": "Razorpay Corporate Office"

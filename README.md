@@ -33,7 +33,6 @@ This is a fully functional e-commerce platform for selling pet products built us
 -   **Python:** The programming language.
 -   **HTML, CSS, JavaScript, Bootstrap:** For frontend development.
 -   **Database:** PostgreSQL
--
 
 ## Installation
 
@@ -61,10 +60,9 @@ This is a fully functional e-commerce platform for selling pet products built us
     ```
 
 5.  **Apply migrations:**    
-    -   Run migrations:
-        ```bash
-        python manage.py migrate
-        ```
+    ```bash
+    python manage.py migrate
+    ```
 
 6.  **Create a superuser (for admin access):**
     ```bash
@@ -77,7 +75,8 @@ This is a fully functional e-commerce platform for selling pet products built us
     ```
 
 7.  **Access the application:** 
-    Open your web browser and navigate to `http://127.0.0.1:8000/`.
+-   Open your web browser and navigate to `http://127.0.0.1:8000/`.
+    
 
 
 

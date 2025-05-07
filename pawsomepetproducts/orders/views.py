@@ -428,6 +428,8 @@ def place_order_view(request):
                     "amount": amount,
                     "user": current_user,
                     "online_payment_amount": grand_total,
+                    'RAZOR_KEY_ID': settings.RAZOR_KEY_ID,
+                    'RAZORPAY_CALLBACK_URL': settings.RAZORPAY_CALLBACK_URL,
                 }
             # Store the Razorpay order ID  and orderin session
             request.session["razorpay_order_id"] = razorpay_order["id"]
@@ -636,6 +638,8 @@ def place_order_view(request):
                         "user": current_user,
                         "wallet_payment_amount": wallet_payment_amount,
                         "online_payment_amount": online_payment_amount,
+                        'RAZOR_KEY_ID': settings.RAZOR_KEY_ID,
+                        'RAZORPAY_CALLBACK_URL': settings.RAZORPAY_CALLBACK_URL,
                     }
 
                 # Store the Razorpay order ID  and orderin session
@@ -1072,7 +1076,9 @@ def user_pending_order_payment_view(request, order_id):
                 "order_id": order_id,
                 "amount": amount,
                 "user": request.user,
-                "online_payment_amount": order_instance.total_amount,
+                "online_payment_amount": order_instance.total_amount,                
+                'RAZOR_KEY_ID': settings.RAZOR_KEY_ID,
+                'RAZORPAY_CALLBACK_URL': settings.RAZORPAY_CALLBACK_URL,
             }
         # Store the Razorpay order ID  and orderin session
         request.session["razorpay_order_id"] = razorpay_order["id"]
@@ -1114,6 +1120,8 @@ def user_pending_order_payment_view(request, order_id):
                     "user": request.user,
                     "wallet_payment_amount": wallet_payment_amount,
                     "online_payment_amount": online_payment_amount,
+                    'RAZOR_KEY_ID': settings.RAZOR_KEY_ID,
+                    'RAZORPAY_CALLBACK_URL': settings.RAZORPAY_CALLBACK_URL,
                 }
 
             # Store the Razorpay order ID  and orderin session
