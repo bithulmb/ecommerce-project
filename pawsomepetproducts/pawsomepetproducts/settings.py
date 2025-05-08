@@ -257,3 +257,7 @@ SOCIALACCOUNT_LOGIN_ON_GET = True #to prevent django all auth intermediate page 
 
 BASE_URL = config("BASE_URL", default="http://127.0.0.1:8000")
 RAZORPAY_CALLBACK_URL = f"{BASE_URL}/user/payment/status"
+
+
+
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS').split(',')
